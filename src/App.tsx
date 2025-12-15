@@ -271,7 +271,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
         <div className="bg-slate-50 min-h-screen font-sans text-slate-900 flex flex-col">
             <div className="grid grid-cols-1 relative">
                 <img
-                    src={`${baseUrl}/header.png`}
+                    src={`${baseUrl}/header_chair.png`}
                     alt="Header Background"
                     className="col-start-1 row-start-1 w-full h-[calc(105vh)] object-cover object-bottom"
                 />
@@ -283,9 +283,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         <p className="text-xl md:text-2xl text-gray-200 mb-8">ส่องข้อมูลตำแหน่งเดิมที่ยาวนาน...<br/>จนกลายเป็นตำนานองค์กร
                         </p>
                     </div>
-                    <button
-                        className="flex flex-col items-center gap-2 text-white hover:text-gray-200 transition-colors cursor-pointer animate-bounce"
-                        aria-label="Scroll down">
+                    <button onClick={() => document.getElementById('table')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-2 text-white hover:text-gray-200 transition-colors cursor-pointer animate-bounce" aria-label="Scroll down">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                              className="lucide lucide-chevron-down w-12 h-12" aria-hidden="true">
@@ -295,7 +293,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                 </div>
             </div>
 
-            <div className="relative w-full min-h-screen flex items-center overflow-hidden" style={{
+            <div className="relative w-full min-h-[500px] flex items-center overflow-hidden" style={{
                 backgroundColor: 'rgb(10, 53, 87)',
                 backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
                 backgroundSize: '50px 50px'
@@ -337,8 +335,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         <div
                             className="relative flex items-center justify-center py-16 md:py-24 border-r-0 md:border-r-2 border-white/30">
                             <div className="text-center px-8">
-                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white"
-                                    style={{lineHeight: '1.4'}}>บอร์ดประกันสังคม</h2>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white" style={{lineHeight: '1.4'}}>บอร์ดประกันสังคม</h2>
                             </div>
                         </div>
                         <div className="flex items-center justify-center py-16 md:py-24">
@@ -355,14 +352,14 @@ const App = ({baseUrl = '/'}: AppProps) => {
 
                 <div className="p-4 md:p-8 bg-slate-50 min-h-screen font-sans text-slate-900 flex flex-col">
                     <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
-        body, .font-sans { font-family: 'Prompt', sans-serif !important; }
-      `}</style>
+                        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+                        body, .font-sans { font-family: 'Prompt', sans-serif !important; }
+                    `}</style>
 
                     <div className="max-w-7xl mx-auto space-y-6 flex-grow w-full">
 
                         {/* Controls Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div id='table' className="grid grid-cols-1 md:grid-cols-5 gap-4">
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
@@ -610,7 +607,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         ยังอยู่ที่เดิม... <br/> หรือจะเปลี่ยนให้ดีขึ้น?
                     </h1>
                     <p className="text-md md:text-xl bg-white text-[#07253C] py-3 px-10 inline-block rounded">
-                        เลือกตั้งประกันสังคม <span className="text-yellow-300">เสียงของคุณมีความหมาย </span>
+                        เลือกตั้งประกันสังคม <span className="text-blue-600">เสียงของคุณมีความหมาย </span>
                     </p>
                 </div>
             </div>
@@ -618,7 +615,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
 
             {/* Disclaimer Footer */}
             <footer className="mt-8 px-3 py-8 border-t border-slate-200 text-center">
-                <div className="max-w-2xl mx-auto space-y-4">
+                <div className="max-w-3xl mx-auto space-y-4">
                     <p className="text-slate-500 text-sm">
                         <span className="font-semibold text-slate-700 block mb-1">Disclaimer:</span>
                         แหล่งที่มาของข้อมูล: <a
@@ -626,13 +623,13 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         target="_blank" rel="noreferrer"
                         className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
                         size={12}/></a> <br/>
-                        ข้อมูลที่แสดงผลใน Dashboard
-                        นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น
-                        ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง </p>
+                        ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น <br/>
+                        ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
+                    </p>
 
                     <p className="text-slate-500 text-sm">
-                        ทั้งนี้ ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR)
-                        อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ
+                        ทั้งนี้ ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) <br/>
+                        อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br/>
                         ผู้ใช้ควรตรวจสอบความถูกต้องจากเอกสารต้นฉบับของสำนักงานประกันสังคมอีกครั้งก่อนนำไปอ้างอิงหรือใช้ในการตัดสินใจ
                     </p>
 
@@ -642,7 +639,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Download size={14}/>
-                        Download Data (JSON) ที่นำมาแสดงข้อมูล
+                        Download ข้อมูลบอร์ดสำนักงานประกันสังคม (JSON) ที่นำมาแสดงข้อมูล
                     </button>
                 </div>
             </footer>
