@@ -245,7 +245,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
     }, [members, dimensions, baseUrl]);
 
     return (
-        <div ref={containerRef} className="w-full h-full min-h-[600px] bg-slate-900 rounded-xl overflow-hidden relative">
+        <div ref={containerRef} className="w-full h-full relative overflow-hidden rounded-lg">
             <svg
                 ref={svgRef}
                 className="w-full h-full block"

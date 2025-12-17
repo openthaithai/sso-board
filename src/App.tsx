@@ -439,7 +439,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             </div>
                         </div>
 
-                        {/* View Toggle */}
+
+                        {/* View Toggle - Only show when in Table mode (or let the floating button handle Bubble mode) */}
                         <div className="flex justify-end my-4">
                             <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
                                 <button
@@ -638,9 +639,21 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                     </div>
                                 </div>
                             </div>
+
                         ) : (
-                            /* Bubble Chart Mode */
-                            <div className="bg-slate-900 rounded-xl shadow-lg border border-slate-700 p-1 min-h-[700px]">
+                            /* Bubble Chart Mode - Full Screen */
+                            <div className="fixed inset-0 z-40 bg-slate-900 flex flex-col">
+                                {/* Floating header/controls for Bubble Mode */}
+                                <div className="absolute top-4 right-4 z-50 flex gap-2">
+                                    <button
+                                        onClick={() => setViewMode('table')}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full text-sm font-medium transition-all border border-white/20 shadow-lg"
+                                    >
+                                        <List size={18} />
+                                        Switch to Table View
+                                    </button>
+                                </div>
+
                                 <BubbleChart
                                     members={statsData.members}
                                     baseUrl={baseUrl}
@@ -653,69 +666,72 @@ const App = ({ baseUrl = '/' }: AppProps) => {
             </div >
 
             {/* Member Detail Modal */}
-            {selectedMember && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMember(null)}>
-                    <div
-                        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        {/* Modal Header / Image */}
-                        <div className="p-6 pb-0 flex flex-col items-center text-center relative">
-                            <button
-                                onClick={() => setSelectedMember(null)}
-                                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
+            {
+                selectedMember && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMember(null)}>
 
-                            <div className="w-32 h-32 rounded-full p-1 bg-white shadow-lg -mb-4 z-10 relative">
-                                <img
-                                    src={`${baseUrl}/images/${selectedMember.name}.jpg`}
-                                    alt={selectedMember.name}
-                                    className="w-full h-full object-cover rounded-full border border-slate-100"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        <div
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Modal Header / Image */}
+                            <div className="p-6 pb-0 flex flex-col items-center text-center relative">
+                                <button
+                                    onClick={() => setSelectedMember(null)}
+                                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X size={24} />
+                                </button>
 
-                        {/* Modal Content */}
-                        <div className="bg-slate-50 pt-16 pb-8 px-8 flex flex-col items-center">
-                            <h2 className="text-xl font-bold text-slate-800 mb-1 font-prompt">{selectedMember.name}</h2>
-                            <div className="text-sm font-semibold text-blue-600 mb-6 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                                ครองตำแหน่งรวม: {selectedMember.totalYears} ปี
+                                <div className="w-32 h-32 rounded-full p-1 bg-white shadow-lg -mb-4 z-10 relative">
+                                    <img
+                                        src={`${baseUrl}/images/${selectedMember.name}.jpg`}
+                                        alt={selectedMember.name}
+                                        className="w-full h-full object-cover rounded-full border border-slate-100"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                                        }}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="w-full space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                                {/* Iterate history in reverse chronological order */}
-                                {selectedMember.years.sort((a, b) => b - a).map(year => (
-                                    <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0">
-                                        <div className="font-bold text-slate-500 w-12 flex-shrink-0">{year}</div>
-                                        <div className="text-left text-slate-700">
-                                            <div className="font-medium">{selectedMember.history[year]}</div>
-                                            {selectedMember.committeeHistory[year]?.map((comm, i) => (
-                                                <div key={i} className="text-xs text-slate-500 mt-0.5">
-                                                    ({comm})
-                                                </div>
-                                            ))}
+                            {/* Modal Content */}
+                            <div className="bg-slate-50 pt-16 pb-8 px-8 flex flex-col items-center">
+                                <h2 className="text-xl font-bold text-slate-800 mb-1 font-prompt">{selectedMember.name}</h2>
+                                <div className="text-sm font-semibold text-blue-600 mb-6 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                    ครองตำแหน่งรวม: {selectedMember.totalYears} ปี
+                                </div>
+
+                                <div className="w-full space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    {/* Iterate history in reverse chronological order */}
+                                    {selectedMember.years.sort((a, b) => b - a).map(year => (
+                                        <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0">
+                                            <div className="font-bold text-slate-500 w-12 flex-shrink-0">{year}</div>
+                                            <div className="text-left text-slate-700">
+                                                <div className="font-medium">{selectedMember.history[year]}</div>
+                                                {selectedMember.committeeHistory[year]?.map((comm, i) => (
+                                                    <div key={i} className="text-xs text-slate-500 mt-0.5">
+                                                        ({comm})
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="p-4 border-t border-slate-100 bg-white">
-                            <button
-                                onClick={() => setSelectedMember(null)}
-                                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-colors"
-                            >
-                                Close
-                            </button>
+                            <div className="p-4 border-t border-slate-100 bg-white">
+                                <button
+                                    onClick={() => setSelectedMember(null)}
+                                    className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
             <div className="relative min-h-[400px] flex items-center justify-center text-center bg-[#07253C]">
