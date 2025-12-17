@@ -1,11 +1,11 @@
-import {useState, useMemo, useEffect} from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
     Calendar,
     Filter,
     BarChart3,
     FileText,
     ExternalLink,
-    Search, AlertCircle, Download
+    Search, AlertCircle, Download, X
 } from 'lucide-react';
 
 // --- Data from "SSO Report - Board.csv" (Head & Tail only available to AI) ---
@@ -56,13 +56,14 @@ interface AppProps {
     baseUrl?: string;
 }
 
-const App = ({baseUrl = '/'}: AppProps) => {
+const App = ({ baseUrl = '/' }: AppProps) => {
     const [rawData, setRawData] = useState<BoardRecord[]>([]);
     const [selectedCommittee, setSelectedCommittee] = useState<string>('All');
     const [selectedYear, setSelectedYear] = useState<number | 'All'>('All');
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [sortBy, setSortBy] = useState<'total' | 'consecutive' | 'name'>('total');
     const [dataMode, setDataMode] = useState<'sample' | 'full' | 'simulated'>('sample');
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     // --- Robust CSV Parsing Logic ---
     const parseCSV = (csvText: string) => {
@@ -140,7 +141,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
     const handleDownloadJSON = () => {
         if (rawData.length === 0) return;
         const dataStr = JSON.stringify(rawData, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
+        const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -254,7 +255,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
             return a.name.localeCompare(b.name, 'th');
         });
 
-        return {members, minYear, maxYear};
+        return { members, minYear, maxYear };
     }, [rawData, selectedCommittee, sortBy, searchQuery, selectedYear]);
 
     const yearRange = useMemo(() => {
@@ -279,14 +280,14 @@ const App = ({baseUrl = '/'}: AppProps) => {
                     className="col-start-1 row-start-1 relative z-10 flex flex-col items-center justify-between h-full pt-24 md:pt-32 pb-8 px-4 text-center">
                     <div className="space-y-6 max-w-4xl mx-auto">
                         <h1 className="text-5xl md:text-6xl lg:text-7xl text-white mb-6"
-                            style={{lineHeight: '1.2'}}>ผ่านมากี่ปี<br/>เก้าอี้ก็ยังเป็นของคนเดิม</h1>
-                        <p className="text-xl md:text-2xl text-gray-200 mb-8">ส่องข้อมูลตำแหน่งเดิมที่ยาวนาน...<br/>จนกลายเป็นตำนานองค์กร
+                            style={{ lineHeight: '1.2' }}>ผ่านมากี่ปี<br />เก้าอี้ก็ยังเป็นของคนเดิม</h1>
+                        <p className="text-xl md:text-2xl text-gray-200 mb-8">ส่องข้อมูลตำแหน่งเดิมที่ยาวนาน...<br />จนกลายเป็นตำนานองค์กร
                         </p>
                     </div>
                     <button onClick={() => document.getElementById('table')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center gap-2 text-white hover:text-gray-200 transition-colors cursor-pointer animate-bounce" aria-label="Scroll down">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                             className="lucide lucide-chevron-down w-12 h-12" aria-hidden="true">
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            className="lucide lucide-chevron-down w-12 h-12" aria-hidden="true">
                             <path d="m6 9 6 6 6-6"></path>
                         </svg>
                     </button>
@@ -300,22 +301,22 @@ const App = ({baseUrl = '/'}: AppProps) => {
             }}>
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-[5%] left-[5%] text-7xl opacity-20 animate-bounce"
-                         style={{animationDelay: '0s', animationDuration: '3s', transform: 'rotate(-25deg)'}}>🪑
+                        style={{ animationDelay: '0s', animationDuration: '3s', transform: 'rotate(-25deg)' }}>🪑
                     </div>
                     <div className="absolute top-[8%] right-[8%] text-6xl opacity-20 animate-bounce"
-                         style={{animationDelay: '0.5s', animationDuration: '3.5s', transform: 'rotate(35deg)'}}>🪑
+                        style={{ animationDelay: '0.5s', animationDuration: '3.5s', transform: 'rotate(35deg)' }}>🪑
                     </div>
                     <div className="absolute top-[50%] left-[3%] text-6xl opacity-20 animate-bounce"
-                         style={{animationDelay: '1.5s', animationDuration: '4.5s', transform: 'rotate(15deg)'}}>🪑
+                        style={{ animationDelay: '1.5s', animationDuration: '4.5s', transform: 'rotate(15deg)' }}>🪑
                     </div>
                     <div className="absolute top-[48%] right-[5%] text-5xl opacity-20 animate-bounce"
-                         style={{animationDelay: '0.8s', animationDuration: '3.8s', transform: 'rotate(-30deg)'}}>🪑
+                        style={{ animationDelay: '0.8s', animationDuration: '3.8s', transform: 'rotate(-30deg)' }}>🪑
                     </div>
                     <div className="absolute bottom-[8%] left-[10%] text-6xl opacity-20 animate-bounce"
-                         style={{animationDelay: '1s', animationDuration: '4s', transform: 'rotate(-15deg)'}}>🪑
+                        style={{ animationDelay: '1s', animationDuration: '4s', transform: 'rotate(-15deg)' }}>🪑
                     </div>
                     <div className="absolute bottom-[10%] right-[12%] text-7xl opacity-20 animate-bounce"
-                         style={{animationDelay: '2s', animationDuration: '3.2s', transform: 'rotate(40deg)'}}>🪑
+                        style={{ animationDelay: '2s', animationDuration: '3.2s', transform: 'rotate(40deg)' }}>🪑
                     </div>
                     <div className="absolute top-[25%] left-[50%] text-6xl opacity-20 animate-bounce" style={{
                         animationDelay: '1.2s',
@@ -335,13 +336,13 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         <div
                             className="relative flex items-center justify-center py-16 md:py-24 border-r-0 md:border-r-2 border-white/30">
                             <div className="text-center px-8">
-                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white" style={{lineHeight: '1.4'}}>บอร์ดประกันสังคม</h2>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white" style={{ lineHeight: '1.4' }}>บอร์ดประกันสังคม</h2>
                             </div>
                         </div>
                         <div className="flex items-center justify-center py-16 md:py-24">
                             <div className="text-center px-8">
                                 <p className="text-4xl md:text-5xl lg:text-6xl text-white font-bold"
-                                   style={{lineHeight: '1.4'}}>อยู่ตำแหน่งเดิม<br/>นานแค่ไหน?</p>
+                                    style={{ lineHeight: '1.4' }}>อยู่ตำแหน่งเดิม<br />นานแค่ไหน?</p>
                             </div>
                         </div>
                     </div>
@@ -363,7 +364,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
-                                    <Calendar size={16}/> เลือกปีที่ดำรงตำแหน่ง
+                                    <Calendar size={16} /> เลือกปีที่ดำรงตำแหน่ง
                                 </label>
                                 <select
                                     className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-prompt bg-slate-50"
@@ -379,7 +380,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
-                                    <Filter size={16}/> เลือกคณะกรรมการ
+                                    <Filter size={16} /> เลือกคณะกรรมการ
                                 </label>
                                 <select
                                     className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
@@ -388,14 +389,14 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                 >
                                     {committees.map(c => (
                                         <option key={c}
-                                                value={c}>{c === 'All' ? 'แสดงทั้งหมด (All Committees)' : c}</option>
+                                            value={c}>{c === 'All' ? 'แสดงทั้งหมด (All Committees)' : c}</option>
                                     ))}
                                 </select>
                             </div>
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
-                                    <Search size={16}/> ค้นหาชื่อ
+                                    <Search size={16} /> ค้นหาชื่อ
                                 </label>
                                 <input
                                     type="text"
@@ -408,14 +409,14 @@ const App = ({baseUrl = '/'}: AppProps) => {
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
-                                    <BarChart3 size={16}/> เรียงลำดับตาม
+                                    <BarChart3 size={16} /> เรียงลำดับตาม
                                 </label>
                                 <div className="flex bg-slate-100 rounded-lg p-1">
                                     <button onClick={() => setSortBy('total')}
-                                            className={`flex-1 py-1 text-xs md:text-sm rounded-md ${sortBy === 'total' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>อยู่นานสุด
+                                        className={`flex-1 py-1 text-xs md:text-sm rounded-md ${sortBy === 'total' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>อยู่นานสุด
                                     </button>
                                     <button onClick={() => setSortBy('consecutive')}
-                                            className={`flex-1 py-1 text-xs md:text-sm rounded-md ${sortBy === 'consecutive' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>ต่อเนื่องสุด
+                                        className={`flex-1 py-1 text-xs md:text-sm rounded-md ${sortBy === 'consecutive' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>ต่อเนื่องสุด
                                     </button>
                                 </div>
                             </div>
@@ -430,7 +431,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                     </div>
                                 </div>
                                 <FileText
-                                    className="absolute right-2 bottom-2 text-blue-100 w-16 h-16 pointer-events-none"/>
+                                    className="absolute right-2 bottom-2 text-blue-100 w-16 h-16 pointer-events-none" />
                             </div>
                         </div>
 
@@ -439,7 +440,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                             <div
                                 className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                                    <Calendar size={18}/> Timeline การดำรงตำแหน่ง
+                                    <Calendar size={18} /> Timeline การดำรงตำแหน่ง
                                 </h3>
                                 <div className="flex items-center gap-4 text-xs text-slate-500">
                                     <div className="flex items-center gap-1"><span
@@ -470,7 +471,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                         <div className="flex-1 flex gap-1">
                                             {yearRange.map(year => (
                                                 <div key={year}
-                                                     className={`flex-1 min-w-[30px] text-center text-xs ${dataMode === 'sample' && year > 2550 && year < 2566 ? 'text-red-300' : (selectedYear === year ? 'text-blue-600 font-bold bg-blue-50 rounded' : 'text-slate-500')}`}>
+                                                    className={`flex-1 min-w-[30px] text-center text-xs ${dataMode === 'sample' && year > 2550 && year < 2566 ? 'text-red-300' : (selectedYear === year ? 'text-blue-600 font-bold bg-blue-50 rounded' : 'text-slate-500')}`}>
                                                     {year}
                                                 </div>
                                             ))}
@@ -481,19 +482,33 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                     <div className="space-y-1">
                                         {statsData.members.map((member, idx) => (
                                             <div key={idx}
-                                                 className="flex items-center hover:bg-slate-50 transition-colors py-2 border-b border-slate-50 last:border-0 group">
-                                                <div className="w-64 flex-shrink-0 pr-4 pl-2">
-                                                    <div className="text-sm font-medium text-slate-700 truncate"
-                                                         title={member.name}>{member.name}</div>
-                                                    <div className="text-xs text-slate-400 truncate"
-                                                         title={Object.values(member.history)[0]}>{Object.values(member.history)[0]}</div>
+                                                className="flex items-center hover:bg-slate-50 transition-colors py-2 border-b border-slate-50 last:border-0 group">
+                                                <div className="w-64 flex-shrink-0 pr-4 pl-2 flex items-start gap-3">
+                                                    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                                        onClick={() => setSelectedImage(`${baseUrl}/images/${member.name}.jpg`)}
+                                                    >
+                                                        <img
+                                                            src={`${baseUrl}/images/${member.name}.jpg`}
+                                                            alt={member.name}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex-grow min-w-0">
+                                                        <div className="text-sm font-medium text-slate-700 truncate"
+                                                            title={member.name}>{member.name}</div>
+                                                        <div className="text-xs text-slate-400 truncate"
+                                                            title={Object.values(member.history)[0]}>{Object.values(member.history)[0]}</div>
 
-                                                    {/* NEW: Committee Type Display */}
-                                                    <div className="text-[10px] text-indigo-500 font-medium mt-0.5">
-                                                        {member.uniqueRoles.map((role, i) => (
-                                                            <div key={i}>{role}</div>
-                                                        ))}
-                                                        {member.uniqueRoles.length === 0 && '-'}
+                                                        {/* NEW: Committee Type Display */}
+                                                        <div className="text-[10px] text-indigo-500 font-medium mt-0.5">
+                                                            {member.uniqueRoles.map((role, i) => (
+                                                                <div key={i}>{role}</div>
+                                                            ))}
+                                                            {member.uniqueRoles.length === 0 && '-'}
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -529,11 +544,11 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                                                 key={year}
                                                                 className={`flex-1 min-w-[30px] rounded-sm relative group/cell transition-all border border-transparent flex items-center justify-center
                               ${hasPosition
-                                                                    ? 'cursor-pointer hover:bg-slate-100'
-                                                                    : isMissingGap
-                                                                        ? 'bg-slate-50 opacity-50'
-                                                                        : 'bg-slate-50'
-                                                                }
+                                                                        ? 'cursor-pointer hover:bg-slate-100'
+                                                                        : isMissingGap
+                                                                            ? 'bg-slate-50 opacity-50'
+                                                                            : 'bg-slate-50'
+                                                                    }
                               ${isSelectedYear && !hasPosition ? 'bg-slate-100' : ''}
                               ${isSelectedYear && hasPosition ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
                             `}
@@ -542,7 +557,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                                                     <>
                                                                         <span
                                                                             className={`leading-none select-none filter transition-all ${isSimulated ? 'opacity-50 grayscale' : ''}`}
-                                                                            style={{fontSize: `${dynamicSize}px`}}
+                                                                            style={{ fontSize: `${dynamicSize}px` }}
                                                                         >
                                                                             🪑
                                                                         </span>
@@ -581,7 +596,7 @@ const App = ({baseUrl = '/'}: AppProps) => {
                                         {statsData.members.length === 0 && (
                                             <div
                                                 className="text-center py-12 text-slate-400 flex flex-col items-center">
-                                                <AlertCircle className="w-10 h-10 mb-2 opacity-50"/>
+                                                <AlertCircle className="w-10 h-10 mb-2 opacity-50" />
                                                 ไม่พบรายชื่อที่ค้นหา หรือไม่มีกรรมการในปีที่เลือก
                                             </div>
                                         )}
@@ -598,13 +613,13 @@ const App = ({baseUrl = '/'}: AppProps) => {
                 {/* Background image as overlay */}
                 <div
                     className="absolute inset-0 bg-center bg-contain bg-no-repeat opacity-30"
-                    style={{backgroundImage: `url(${baseUrl}/vote.png)`}}
+                    style={{ backgroundImage: `url(${baseUrl}/vote.png)` }}
                 />
 
                 {/* Text content */}
                 <div className="relative space-y-6 max-w-4xl mx-auto z-10 px-4">
-                    <h1 className="text-5xl md:text-6xl lg:text-5xl text-white mb-5" style={{lineHeight: '1.5'}}>
-                        ยังอยู่ที่เดิม... <br/> หรือจะเปลี่ยนให้ดีขึ้น?
+                    <h1 className="text-5xl md:text-6xl lg:text-5xl text-white mb-5" style={{ lineHeight: '1.5' }}>
+                        ยังอยู่ที่เดิม... <br /> หรือจะเปลี่ยนให้ดีขึ้น?
                     </h1>
                     <p className="text-md md:text-xl bg-white text-[#07253C] py-3 px-10 inline-block rounded">
                         เลือกตั้งประกันสังคม <span className="text-blue-600">เสียงของคุณมีความหมาย </span>
@@ -619,17 +634,17 @@ const App = ({baseUrl = '/'}: AppProps) => {
                     <p className="text-slate-500 text-sm">
                         <span className="font-semibold text-slate-700 block mb-1">Disclaimer:</span>
                         แหล่งที่มาของข้อมูล: <a
-                        href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
-                        target="_blank" rel="noreferrer"
-                        className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
-                        size={12}/></a> <br/>
-                        ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น <br/>
+                            href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
+                            target="_blank" rel="noreferrer"
+                            className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
+                                size={12} /></a> <br />
+                        ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น <br />
                         ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
                     </p>
 
                     <p className="text-slate-500 text-sm">
-                        ทั้งนี้ ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) <br/>
-                        อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br/>
+                        ทั้งนี้ ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) <br />
+                        อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
                         ผู้ใช้ควรตรวจสอบความถูกต้องจากเอกสารต้นฉบับของสำนักงานประกันสังคมอีกครั้งก่อนนำไปอ้างอิงหรือใช้ในการตัดสินใจ
                     </p>
 
@@ -638,12 +653,38 @@ const App = ({baseUrl = '/'}: AppProps) => {
                         disabled={rawData.length === 0}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Download size={14}/>
+                        <Download size={14} />
                         Download ข้อมูลบอร์ดสำนักงานประกันสังคม (JSON) ที่นำมาแสดงข้อมูล
                     </button>
                 </div>
             </footer>
             {/* Disclaimer Footer */}
+
+            {/* Lightbox Modal */}
+            {selectedImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+                        <button
+                            className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            <X size={32} />
+                        </button>
+                        <img
+                            src={selectedImage}
+                            alt="Full size"
+                            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
