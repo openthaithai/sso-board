@@ -5,8 +5,10 @@ import {
     BarChart3,
     FileText,
     ExternalLink,
-    Search, AlertCircle, Download, X
+    Search, AlertCircle, Download, X,
+    LayoutGrid, List
 } from 'lucide-react';
+import BubbleChart from './components/BubbleChart';
 
 // --- Data from "SSO Report - Board.csv" (Head & Tail only available to AI) ---
 const PRELOADED_CSV = `ปี,ชื่อ-นามสกุล,ตำแหน่ง,ประเภทกรรมการ,คณะกรรมการ
@@ -39,7 +41,7 @@ interface BoardRecord {
     committee: string;
 }
 
-interface MemberStats {
+export interface MemberStats {
     name: string;
     totalYears: number;
     maxConsecutive: number;
@@ -63,7 +65,9 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [sortBy, setSortBy] = useState<'total' | 'consecutive' | 'name'>('total');
     const [dataMode, setDataMode] = useState<'sample' | 'full' | 'simulated'>('sample');
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    // Removed selectedImage state
+    const [viewMode, setViewMode] = useState<'table' | 'bubble'>('table');
+    const [selectedMember, setSelectedMember] = useState<MemberStats | null>(null);
 
     // --- Robust CSV Parsing Logic ---
     const parseCSV = (csvText: string) => {
@@ -435,180 +439,299 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             </div>
                         </div>
 
-                        {/* Main Visualization: Timeline Matrix */}
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-                            <div
-                                className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                                    <Calendar size={18} /> Timeline การดำรงตำแหน่ง
-                                </h3>
-                                <div className="flex items-center gap-4 text-xs text-slate-500">
-                                    <div className="flex items-center gap-1"><span
-                                        className="text-base">🪑</span> มีตำแหน่ง
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <div className="w-3 h-3 bg-slate-100 rounded-sm"></div>
-                                        ไม่มีตำแหน่ง
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="overflow-x-auto">
-                                <div className="min-w-[800px] p-6">
-                                    {/* Header Row */}
-                                    <div className="flex mb-2">
-                                        <div
-                                            className="w-64 flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อกรรมการ
-                                        </div>
-                                        <div
-                                            className="w-48 flex-shrink-0 text-center text-xs font-semibold text-slate-500">ระยะเวลา
-                                            (ปี)
-                                        </div>
-                                        <div
-                                            className="w-24 flex-shrink-0 text-center text-xs font-semibold text-slate-500 border-r border-slate-200 mr-2">ต่อเนื่อง
-                                            (ปี)
-                                        </div>
-                                        <div className="flex-1 flex gap-1">
-                                            {yearRange.map(year => (
-                                                <div key={year}
-                                                    className={`flex-1 min-w-[30px] text-center text-xs ${dataMode === 'sample' && year > 2550 && year < 2566 ? 'text-red-300' : (selectedYear === year ? 'text-blue-600 font-bold bg-blue-50 rounded' : 'text-slate-500')}`}>
-                                                    {year}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Rows */}
-                                    <div className="space-y-1">
-                                        {statsData.members.map((member, idx) => (
-                                            <div key={idx}
-                                                className="flex items-center hover:bg-slate-50 transition-colors py-2 border-b border-slate-50 last:border-0 group">
-                                                <div className="w-64 flex-shrink-0 pr-4 pl-2 flex flex-col items-center gap-2 text-center">
-                                                    <div className="flex-shrink-0 w-24 h-24 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
-                                                        onClick={() => setSelectedImage(`${baseUrl}/images/${member.name}.jpg`)}
-                                                    >
-                                                        <img
-                                                            src={`${baseUrl}/images/${member.name}.jpg`}
-                                                            alt={member.name}
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <div className="w-full">
-                                                        <div className="text-sm font-medium text-slate-700 truncate"
-                                                            title={member.name}>{member.name}</div>
-                                                        <div className="text-xs text-slate-400 truncate"
-                                                            title={Object.values(member.history)[0]}>{Object.values(member.history)[0]}</div>
-
-                                                        {/* NEW: Committee Type Display */}
-                                                        <div className="text-[10px] text-indigo-500 font-medium mt-0.5">
-                                                            {member.uniqueRoles.map((role, i) => (
-                                                                <div key={i}>{role}</div>
-                                                            ))}
-                                                            {member.uniqueRoles.length === 0 && '-'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="w-48 flex-shrink-0 text-center">
-                                                    <span
-                                                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                                                        {member.totalYears} ปี จากข้อมูลทั้งหมด {allYears.length} ปี
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    className="w-24 flex-shrink-0 text-center border-r border-slate-200 mr-2">
-                                                    <span
-                                                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.maxConsecutive > 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                                                        {member.maxConsecutive}
-                                                    </span>
-                                                </div>
-
-                                                {/* Timeline Grid */}
-                                                < div className="flex-1 flex gap-1 h-8" >
-                                                    {
-                                                        yearRange.map(year => {
-                                                            const hasPosition = member.years.includes(year);
-                                                            const positionName = member.history[year];
-                                                            const typeName = member.typeHistory[year]; // New Type History Access
-                                                            const isMissingGap = dataMode === 'sample' && year > 2550 && year < 2566;
-                                                            const isSimulated = dataMode === 'simulated' && year > 2550 && year < 2566;
-                                                            const isSelectedYear = selectedYear === year;
-
-                                                            const yearsServedSoFar = member.years.filter(y => y <= year).length;
-                                                            const dynamicSize = Math.min(28, 12 + (yearsServedSoFar * 1.5));
-
-                                                            return (
-                                                                <div
-                                                                    key={year}
-                                                                    className={`flex-1 min-w-[30px] rounded-sm relative group/cell transition-all border border-transparent flex items-center justify-center
-                              ${hasPosition
-                                                                            ? 'cursor-pointer hover:bg-slate-100'
-                                                                            : isMissingGap
-                                                                                ? 'bg-slate-50 opacity-50'
-                                                                                : 'bg-slate-50'
-                                                                        }
-                              ${isSelectedYear && !hasPosition ? 'bg-slate-100' : ''}
-                              ${isSelectedYear && hasPosition ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
-                            `}
-                                                                >
-                                                                    {hasPosition && (
-                                                                        <>
-                                                                            <span
-                                                                                className={`leading-none select-none filter transition-all ${isSimulated ? 'opacity-50 grayscale' : ''}`}
-                                                                                style={{ fontSize: `${dynamicSize}px` }}
-                                                                            >
-                                                                                🪑
-                                                                            </span>
-                                                                            <div
-                                                                                className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/cell:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none font-sans z-50">
-                                                                                <div
-                                                                                    className="font-bold text-blue-200">ปี {year} {isSimulated ? '(จำลอง)' : ''}</div>
-                                                                                <div
-                                                                                    className="mb-1 text-white">{positionName}</div>
-                                                                                {/* Updated Tooltip with Type Info */}
-                                                                                <div
-                                                                                    className="text-slate-300 mb-1 border-t border-slate-700 pt-1">
-                                                                                    <span
-                                                                                        className="font-semibold text-blue-300">ประเภท:</span> {typeName || '-'}
-                                                                                </div>
-                                                                                <div
-                                                                                    className="text-slate-300 mb-1">
-                                                                                    <span
-                                                                                        className="font-semibold text-blue-300">คณะ:</span> {member.committeeHistory[year]?.join(', ') || '-'}
-                                                                                </div>
-                                                                                <div
-                                                                                    className="text-slate-400">อยู่ในตำแหน่งมา: {yearsServedSoFar} ปี
-                                                                                </div>
-                                                                                <div
-                                                                                    className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
-                                                                            </div>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })
-                                                    }
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        {statsData.members.length === 0 && (
-                                            <div
-                                                className="text-center py-12 text-slate-400 flex flex-col items-center">
-                                                <AlertCircle className="w-10 h-10 mb-2 opacity-50" />
-                                                ไม่พบรายชื่อที่ค้นหา หรือไม่มีกรรมการในปีที่เลือก
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                        {/* View Toggle - Only show when in Table mode (or let the floating button handle Bubble mode) */}
+                        <div className="flex justify-end my-4">
+                            <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'table'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <List size={18} />
+                                    Table View
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('bubble')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'bubble'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <LayoutGrid size={18} />
+                                    Bubble Mode
+                                </button>
                             </div>
                         </div>
+
+                        {/* Main Content Area */}
+                        {viewMode === 'table' ? (
+                            /* Timeline Matrix (Existing) */
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+                                <div
+                                    className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                    <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                                        <Calendar size={18} /> Timeline การดำรงตำแหน่ง
+                                    </h3>
+                                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                                        <div className="flex items-center gap-1"><span
+                                            className="text-base">🪑</span> มีตำแหน่ง
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-3 h-3 bg-slate-100 rounded-sm"></div>
+                                            ไม่มีตำแหน่ง
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <div className="min-w-[800px] p-6">
+                                        {/* Header Row */}
+                                        <div className="flex mb-2">
+                                            <div
+                                                className="w-64 flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อกรรมการ
+                                            </div>
+                                            <div
+                                                className="w-48 flex-shrink-0 text-center text-xs font-semibold text-slate-500">ระยะเวลา
+                                                (ปี)
+                                            </div>
+                                            <div
+                                                className="w-24 flex-shrink-0 text-center text-xs font-semibold text-slate-500 border-r border-slate-200 mr-2">ต่อเนื่อง
+                                                (ปี)
+                                            </div>
+                                            <div className="flex-1 flex gap-1">
+                                                {yearRange.map(year => (
+                                                    <div key={year}
+                                                        className={`flex-1 min-w-[30px] text-center text-xs ${dataMode === 'sample' && year > 2550 && year < 2566 ? 'text-red-300' : (selectedYear === year ? 'text-blue-600 font-bold bg-blue-50 rounded' : 'text-slate-500')}`}>
+                                                        {year}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Rows */}
+                                        <div className="space-y-1">
+                                            {statsData.members.map((member, idx) => (
+                                                <div key={idx}
+                                                    className="flex items-center hover:bg-slate-50 transition-colors py-2 border-b border-slate-50 last:border-0 group">
+                                                    <div className="w-64 flex-shrink-0 pr-4 pl-2 flex flex-col items-center gap-2 text-center">
+                                                        <div className="flex-shrink-0 w-24 h-24 rounded-full overflow-hidden border border-slate-200 cursor-default"
+                                                        // Removed onClick
+                                                        >
+                                                            <img
+                                                                src={`${baseUrl}/images/${member.name}.jpg`}
+                                                                alt={member.name}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="w-full">
+                                                            <div className="text-sm font-medium text-slate-700 truncate"
+                                                                title={member.name}>{member.name}</div>
+                                                            <div className="text-xs text-slate-400 truncate"
+                                                                title={Object.values(member.history)[0]}>{Object.values(member.history)[0]}</div>
+
+                                                            {/* NEW: Committee Type Display */}
+                                                            <div className="text-[10px] text-indigo-500 font-medium mt-0.5">
+                                                                {member.uniqueRoles.map((role, i) => (
+                                                                    <div key={i}>{role}</div>
+                                                                ))}
+                                                                {member.uniqueRoles.length === 0 && '-'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="w-48 flex-shrink-0 text-center">
+                                                        <span
+                                                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
+                                                            {member.totalYears} ปี จากข้อมูลทั้งหมด {allYears.length} ปี
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        className="w-24 flex-shrink-0 text-center border-r border-slate-200 mr-2">
+                                                        <span
+                                                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.maxConsecutive > 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                                            {member.maxConsecutive}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Timeline Grid */}
+                                                    < div className="flex-1 flex gap-1 h-8" >
+                                                        {
+                                                            yearRange.map(year => {
+                                                                const hasPosition = member.years.includes(year);
+                                                                const positionName = member.history[year];
+                                                                const typeName = member.typeHistory[year]; // New Type History Access
+                                                                const isMissingGap = dataMode === 'sample' && year > 2550 && year < 2566;
+                                                                const isSimulated = dataMode === 'simulated' && year > 2550 && year < 2566;
+                                                                const isSelectedYear = selectedYear === year;
+
+                                                                const yearsServedSoFar = member.years.filter(y => y <= year).length;
+                                                                const dynamicSize = Math.min(28, 12 + (yearsServedSoFar * 1.5));
+
+                                                                return (
+                                                                    <div
+                                                                        key={year}
+                                                                        className={`flex-1 min-w-[30px] rounded-sm relative group/cell transition-all border border-transparent flex items-center justify-center
+                                                                ${hasPosition
+                                                                                ? 'cursor-pointer hover:bg-slate-100'
+                                                                                : isMissingGap
+                                                                                    ? 'bg-slate-50 opacity-50'
+                                                                                    : 'bg-slate-50'
+                                                                            }
+                                                                ${isSelectedYear && !hasPosition ? 'bg-slate-100' : ''}
+                                                                ${isSelectedYear && hasPosition ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
+                                                                `}
+                                                                    >
+                                                                        {hasPosition && (
+                                                                            <>
+                                                                                <span
+                                                                                    className={`leading-none select-none filter transition-all ${isSimulated ? 'opacity-50 grayscale' : ''}`}
+                                                                                    style={{ fontSize: `${dynamicSize}px` }}
+                                                                                >
+                                                                                    🪑
+                                                                                </span>
+                                                                                <div
+                                                                                    className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/cell:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none font-sans z-50">
+                                                                                    <div
+                                                                                        className="font-bold text-blue-200">ปี {year} {isSimulated ? '(จำลอง)' : ''}</div>
+                                                                                    <div
+                                                                                        className="mb-1 text-white">{positionName}</div>
+                                                                                    {/* Updated Tooltip with Type Info */}
+                                                                                    <div
+                                                                                        className="text-slate-300 mb-1 border-t border-slate-700 pt-1">
+                                                                                        <span
+                                                                                            className="font-semibold text-blue-300">ประเภท:</span> {typeName || '-'}
+                                                                                    </div>
+                                                                                    <div
+                                                                                        className="text-slate-300 mb-1">
+                                                                                        <span
+                                                                                            className="font-semibold text-blue-300">คณะ:</span> {member.committeeHistory[year]?.join(', ') || '-'}
+                                                                                    </div>
+                                                                                    <div
+                                                                                        className="text-slate-400">อยู่ในตำแหน่งมา: {yearsServedSoFar} ปี
+                                                                                    </div>
+                                                                                    <div
+                                                                                        className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                                                                </div>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })
+                                                        }
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {statsData.members.length === 0 && (
+                                                <div
+                                                    className="text-center py-12 text-slate-400 flex flex-col items-center">
+                                                    <AlertCircle className="w-10 h-10 mb-2 opacity-50" />
+                                                    ไม่พบรายชื่อที่ค้นหา หรือไม่มีกรรมการในปีที่เลือก
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        ) : (
+                            /* Bubble Chart Mode - Full Screen */
+                            <div className="fixed inset-0 z-40 bg-slate-900 flex flex-col">
+                                {/* Floating header/controls for Bubble Mode */}
+                                <div className="absolute top-4 right-4 z-50 flex gap-2">
+                                    <button
+                                        onClick={() => setViewMode('table')}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full text-sm font-medium transition-all border border-white/20 shadow-lg"
+                                    >
+                                        <List size={18} />
+                                        Switch to Table View
+                                    </button>
+                                </div>
+
+                                <BubbleChart
+                                    members={statsData.members}
+                                    baseUrl={baseUrl}
+                                    onMemberClick={(member) => setSelectedMember(member)}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div >
+
+            {/* Member Detail Modal */}
+            {
+                selectedMember && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMember(null)}>
+
+                        <div
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Modal Header / Image */}
+                            <div className="p-6 pb-0 flex flex-col items-center text-center relative">
+                                <button
+                                    onClick={() => setSelectedMember(null)}
+                                    className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X size={24} />
+                                </button>
+
+                                <div className="w-32 h-32 rounded-full p-1 bg-white shadow-lg -mb-4 z-10 relative">
+                                    <img
+                                        src={`${baseUrl}/images/${selectedMember.name}.jpg`}
+                                        alt={selectedMember.name}
+                                        className="w-full h-full object-cover rounded-full border border-slate-100"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="bg-slate-50 pt-16 pb-8 px-8 flex flex-col items-center">
+                                <h2 className="text-xl font-bold text-slate-800 mb-1 font-prompt">{selectedMember.name}</h2>
+                                <div className="text-sm font-semibold text-blue-600 mb-6 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                    ครองตำแหน่งรวม: {selectedMember.totalYears} ปี
+                                </div>
+
+                                <div className="w-full space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    {/* Iterate history in reverse chronological order */}
+                                    {selectedMember.years.sort((a, b) => b - a).map(year => (
+                                        <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0">
+                                            <div className="font-bold text-slate-500 w-12 flex-shrink-0">{year}</div>
+                                            <div className="text-left text-slate-700">
+                                                <div className="font-medium">{selectedMember.history[year]}</div>
+                                                {selectedMember.committeeHistory[year]?.map((comm, i) => (
+                                                    <div key={i} className="text-xs text-slate-500 mt-0.5">
+                                                        ({comm})
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-slate-100 bg-white">
+                                <button
+                                    onClick={() => setSelectedMember(null)}
+                                    className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
 
             <div className="relative min-h-[400px] flex items-center justify-center text-center bg-[#07253C]">
@@ -662,33 +785,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
             </footer>
             {/* Disclaimer Footer */}
 
-            {/* Lightbox Modal */}
-            {
-                selectedImage && (
-                    <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
-                        onClick={() => setSelectedImage(null)}
-                    >
-                        <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
-                            <button
-                                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
-                                onClick={() => setSelectedImage(null)}
-                            >
-                                <X size={32} />
-                            </button>
-                            <img
-                                src={selectedImage}
-                                alt="Full size"
-                                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                                onClick={(e) => e.stopPropagation()}
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
-                                }}
-                            />
-                        </div>
-                    </div>
-                )
-            }
+            {/* Removed Lightbox Modal */}
         </div >
     );
 };
