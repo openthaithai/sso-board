@@ -202,18 +202,20 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
 
         // 4. Name
         node.append('text')
-            .attr('dy', '-0.3em')
+            .attr('dy', d => d.r * 0.5) // Move to lower half
             .attr('text-anchor', 'middle')
             .text(d => d.data.name)
             .attr('fill', 'white')
             .attr('font-size', d => Math.max(12, d.r / 3.5))
             .attr('font-weight', '600')
             .attr('font-family', 'Prompt, sans-serif')
-            .style('pointer-events', 'none');
+            .style('pointer-events', 'none')
+            // Add shadow for better readability against image
+            .style('text-shadow', '0 2px 4px rgba(0,0,0,0.8)');
 
         // 5. Position (Latest)
         node.append('text')
-            .attr('dy', '1.2em')
+            .attr('dy', d => d.r * 0.7) // Move below name
             .attr('text-anchor', 'middle')
             .text(d => {
                 const latestYear = Math.max(...d.data.years);
