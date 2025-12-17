@@ -483,8 +483,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                         {statsData.members.map((member, idx) => (
                                             <div key={idx}
                                                 className="flex items-center hover:bg-slate-50 transition-colors py-2 border-b border-slate-50 last:border-0 group">
-                                                <div className="w-64 flex-shrink-0 pr-4 pl-2 flex items-start gap-3">
-                                                    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                                <div className="w-64 flex-shrink-0 pr-4 pl-2 flex flex-col items-center gap-2 text-center">
+                                                    <div className="flex-shrink-0 w-24 h-24 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity"
                                                         onClick={() => setSelectedImage(`${baseUrl}/images/${member.name}.jpg`)}
                                                     >
                                                         <img
@@ -496,7 +496,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                                             }}
                                                         />
                                                     </div>
-                                                    <div className="flex-grow min-w-0">
+                                                    <div className="w-full">
                                                         <div className="text-sm font-medium text-slate-700 truncate"
                                                             title={member.name}>{member.name}</div>
                                                         <div className="text-xs text-slate-400 truncate"
