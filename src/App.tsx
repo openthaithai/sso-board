@@ -461,7 +461,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                             className="w-64 flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อกรรมการ
                                         </div>
                                         <div
-                                            className="w-24 flex-shrink-0 text-center text-xs font-semibold text-slate-500">ระยะเวลา
+                                            className="w-48 flex-shrink-0 text-center text-xs font-semibold text-slate-500">ระยะเวลา
                                             (ปี)
                                         </div>
                                         <div
@@ -512,10 +512,10 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                                     </div>
                                                 </div>
 
-                                                <div className="w-24 flex-shrink-0 text-center">
+                                                <div className="w-48 flex-shrink-0 text-center">
                                                     <span
                                                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                                                        {member.totalYears} ปี
+                                                        {member.totalYears} ปี จากข้อมูลทั้งหมด {allYears.length} ปี
                                                     </span>
                                                 </div>
                                                 <div
@@ -527,68 +527,70 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                                 </div>
 
                                                 {/* Timeline Grid */}
-                                                <div className="flex-1 flex gap-1 h-8">
-                                                    {yearRange.map(year => {
-                                                        const hasPosition = member.years.includes(year);
-                                                        const positionName = member.history[year];
-                                                        const typeName = member.typeHistory[year]; // New Type History Access
-                                                        const isMissingGap = dataMode === 'sample' && year > 2550 && year < 2566;
-                                                        const isSimulated = dataMode === 'simulated' && year > 2550 && year < 2566;
-                                                        const isSelectedYear = selectedYear === year;
+                                                < div className="flex-1 flex gap-1 h-8" >
+                                                    {
+                                                        yearRange.map(year => {
+                                                            const hasPosition = member.years.includes(year);
+                                                            const positionName = member.history[year];
+                                                            const typeName = member.typeHistory[year]; // New Type History Access
+                                                            const isMissingGap = dataMode === 'sample' && year > 2550 && year < 2566;
+                                                            const isSimulated = dataMode === 'simulated' && year > 2550 && year < 2566;
+                                                            const isSelectedYear = selectedYear === year;
 
-                                                        const yearsServedSoFar = member.years.filter(y => y <= year).length;
-                                                        const dynamicSize = Math.min(28, 12 + (yearsServedSoFar * 1.5));
+                                                            const yearsServedSoFar = member.years.filter(y => y <= year).length;
+                                                            const dynamicSize = Math.min(28, 12 + (yearsServedSoFar * 1.5));
 
-                                                        return (
-                                                            <div
-                                                                key={year}
-                                                                className={`flex-1 min-w-[30px] rounded-sm relative group/cell transition-all border border-transparent flex items-center justify-center
+                                                            return (
+                                                                <div
+                                                                    key={year}
+                                                                    className={`flex-1 min-w-[30px] rounded-sm relative group/cell transition-all border border-transparent flex items-center justify-center
                               ${hasPosition
-                                                                        ? 'cursor-pointer hover:bg-slate-100'
-                                                                        : isMissingGap
-                                                                            ? 'bg-slate-50 opacity-50'
-                                                                            : 'bg-slate-50'
-                                                                    }
+                                                                            ? 'cursor-pointer hover:bg-slate-100'
+                                                                            : isMissingGap
+                                                                                ? 'bg-slate-50 opacity-50'
+                                                                                : 'bg-slate-50'
+                                                                        }
                               ${isSelectedYear && !hasPosition ? 'bg-slate-100' : ''}
                               ${isSelectedYear && hasPosition ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
                             `}
-                                                            >
-                                                                {hasPosition && (
-                                                                    <>
-                                                                        <span
-                                                                            className={`leading-none select-none filter transition-all ${isSimulated ? 'opacity-50 grayscale' : ''}`}
-                                                                            style={{ fontSize: `${dynamicSize}px` }}
-                                                                        >
-                                                                            🪑
-                                                                        </span>
-                                                                        <div
-                                                                            className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/cell:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none font-sans z-50">
+                                                                >
+                                                                    {hasPosition && (
+                                                                        <>
+                                                                            <span
+                                                                                className={`leading-none select-none filter transition-all ${isSimulated ? 'opacity-50 grayscale' : ''}`}
+                                                                                style={{ fontSize: `${dynamicSize}px` }}
+                                                                            >
+                                                                                🪑
+                                                                            </span>
                                                                             <div
-                                                                                className="font-bold text-blue-200">ปี {year} {isSimulated ? '(จำลอง)' : ''}</div>
-                                                                            <div
-                                                                                className="mb-1 text-white">{positionName}</div>
-                                                                            {/* Updated Tooltip with Type Info */}
-                                                                            <div
-                                                                                className="text-slate-300 mb-1 border-t border-slate-700 pt-1">
-                                                                                <span
-                                                                                    className="font-semibold text-blue-300">ประเภท:</span> {typeName || '-'}
+                                                                                className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/cell:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none font-sans z-50">
+                                                                                <div
+                                                                                    className="font-bold text-blue-200">ปี {year} {isSimulated ? '(จำลอง)' : ''}</div>
+                                                                                <div
+                                                                                    className="mb-1 text-white">{positionName}</div>
+                                                                                {/* Updated Tooltip with Type Info */}
+                                                                                <div
+                                                                                    className="text-slate-300 mb-1 border-t border-slate-700 pt-1">
+                                                                                    <span
+                                                                                        className="font-semibold text-blue-300">ประเภท:</span> {typeName || '-'}
+                                                                                </div>
+                                                                                <div
+                                                                                    className="text-slate-300 mb-1">
+                                                                                    <span
+                                                                                        className="font-semibold text-blue-300">คณะ:</span> {member.committeeHistory[year]?.join(', ') || '-'}
+                                                                                </div>
+                                                                                <div
+                                                                                    className="text-slate-400">อยู่ในตำแหน่งมา: {yearsServedSoFar} ปี
+                                                                                </div>
+                                                                                <div
+                                                                                    className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
                                                                             </div>
-                                                                            <div
-                                                                                className="text-slate-300 mb-1">
-                                                                                <span
-                                                                                    className="font-semibold text-blue-300">คณะ:</span> {member.committeeHistory[year]?.join(', ') || '-'}
-                                                                            </div>
-                                                                            <div
-                                                                                className="text-slate-400">อยู่ในตำแหน่งมา: {yearsServedSoFar} ปี
-                                                                            </div>
-                                                                            <div
-                                                                                className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
-                                                                        </div>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    }
                                                 </div>
                                             </div>
                                         ))}
@@ -606,7 +608,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
 
 
             <div className="relative min-h-[400px] flex items-center justify-center text-center bg-[#07253C]">
@@ -661,31 +663,33 @@ const App = ({ baseUrl = '/' }: AppProps) => {
             {/* Disclaimer Footer */}
 
             {/* Lightbox Modal */}
-            {selectedImage && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
-                    onClick={() => setSelectedImage(null)}
-                >
-                    <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
-                        <button
-                            className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
-                            onClick={() => setSelectedImage(null)}
-                        >
-                            <X size={32} />
-                        </button>
-                        <img
-                            src={selectedImage}
-                            alt="Full size"
-                            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                            onClick={(e) => e.stopPropagation()}
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
-                            }}
-                        />
+            {
+                selectedImage && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
+                        onClick={() => setSelectedImage(null)}
+                    >
+                        <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+                            <button
+                                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2"
+                                onClick={() => setSelectedImage(null)}
+                            >
+                                <X size={32} />
+                            </button>
+                            <img
+                                src={selectedImage}
+                                alt="Full size"
+                                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `${baseUrl}/images/placeholder.jpg`;
+                                }}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 
