@@ -196,11 +196,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
                 d3.select(this).attr('xlink:href', `${baseUrl}/images/placeholder.jpg`);
             });
 
-        // 3. Overlay
-        node.append('circle')
-            .attr('r', d => d.r)
-            .attr('fill', 'rgba(0, 0, 0, 0.4)')
-            .attr('stroke', 'none');
+
 
         // 4. Name
         node.append('text')
