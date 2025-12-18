@@ -63,11 +63,13 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         const centerY = height / 2;
 
         // --- Scale Logic ---
-        const minRadius = 25; // Decreased min for better contrast
-        const maxRadius = 140; // Increased max significantly
+        const minRadius = 30; // Increased base size slightly for visibility
+        const maxRadius = 160; // Significantly larger max for contrast
         const maxYears = d3.max(members, d => d.totalYears) || 1;
 
-        const radiusScale = d3.scaleSqrt()
+        // Linear radius scale = Quadratic area scale (Exaggerated visual difference)
+        // Matches user request: Radius = years * factor
+        const radiusScale = d3.scaleLinear()
             .domain([0, maxYears])
             .range([minRadius, maxRadius]);
 
@@ -87,7 +89,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         // --- Simulation Setup ---
         const simulation = d3.forceSimulation<BubbleNode>(nodes)
             .force('charge', d3.forceManyBody().strength(10)) // Weak attraction/repulsion
-            .force('collide', d3.forceCollide<BubbleNode>().radius(d => d.r + 2).iterations(3)) // Prevent overlap
+            .force('collide', d3.forceCollide<BubbleNode>().radius(d => d.r + 0.5).iterations(3)) // Tight gap
             .force('center', d3.forceCenter(centerX, centerY).strength(1)) // Pull to center
             .force('x', d3.forceX(centerX).strength(0.05))
             .force('y', d3.forceY(centerY).strength(0.05))
@@ -190,15 +192,11 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('height', d => d.r * 2)
             .attr('clip-path', (d, i) => `url(#clip-${i}-${d.id.replace(/[^\w-]/g, '')})`)
             .attr('preserveAspectRatio', 'xMidYMid slice')
-            .on('error', function (d) {
+            .on('error', function () { // Removed 'd'
                 d3.select(this).attr('xlink:href', `${baseUrl}/images/placeholder.jpg`);
             });
 
-        // 3. Overlay
-        node.append('circle')
-            .attr('r', d => d.r)
-            .attr('fill', 'rgba(0, 0, 0, 0.4)')
-            .attr('stroke', 'none');
+
 
         // 4. Name
         node.append('text')
@@ -225,7 +223,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('font-size', d => Math.max(10, d.r / 5))
             .attr('font-family', 'Prompt, sans-serif')
             .style('pointer-events', 'none')
-            .each(function (d) {
+            .each(function () { // Removed 'd'
                 const self = d3.select(this);
                 let text = self.text();
                 // Check if truncation is needed logic could go here more precisely with getComputedTextLength
