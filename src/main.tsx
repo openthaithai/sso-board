@@ -3,10 +3,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 
-console.log(Date.now())
+console.log("Main.tsx starting...");
 
-import {initializeApp} from "firebase/app"
-import {getAnalytics} from "firebase/analytics"
+import { initializeApp } from "firebase/app"
+import { getAnalytics } from "firebase/analytics"
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -17,11 +18,31 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
 
-const app = initializeApp(firebaseConfig)
-getAnalytics(app)
+console.log("Firebase config loaded:", !!firebaseConfig.apiKey);
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App baseUrl="/ssoboard" />
-  </StrictMode>,
-)
+try {
+  const app = initializeApp(firebaseConfig)
+  getAnalytics(app)
+  console.log("Firebase initialized");
+} catch (e) {
+  console.error("Firebase init failed:", e);
+}
+
+const rootElement = document.getElementById('root');
+console.log("Root element found:", !!rootElement);
+
+if (rootElement) {
+  try {
+    console.log("Starting React render...");
+    createRoot(rootElement).render(
+      <StrictMode>
+        <App baseUrl="/ssoboard" />
+      </StrictMode>,
+    )
+    console.log("React render called");
+  } catch (e) {
+    console.error("React render failed:", e);
+  }
+} else {
+  console.error("CRITICAL: Root element not found in DOM");
+}
