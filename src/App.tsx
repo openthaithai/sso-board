@@ -59,6 +59,7 @@ interface AppProps {
 }
 
 const App = ({ baseUrl = '/' }: AppProps) => {
+    console.log("App component executing, baseUrl:", baseUrl);
     const [rawData, setRawData] = useState<BoardRecord[]>([]);
     const [selectedCommittee, setSelectedCommittee] = useState<string>('All');
     const [selectedYear, setSelectedYear] = useState<number | 'All'>('All');
@@ -763,14 +764,18 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             target="_blank" rel="noreferrer"
                             className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
                                 size={12} /></a> <br />
-                        ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น <br />
-                        ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
+                        ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
                     </p>
 
                     <p className="text-slate-500 text-sm">
-                        ทั้งนี้ ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) <br />
-                        อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
-                        ผู้ใช้ควรตรวจสอบความถูกต้องจากเอกสารต้นฉบับของสำนักงานประกันสังคมอีกครั้งก่อนนำไปอ้างอิงหรือใช้ในการตัดสินใจ
+                        <span className="font-semibold text-slate-700 block mb-1">ข้อควรระวังและข้อจำกัดของข้อมูล</span>
+                        การประมวลผล: ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
+                        ข้อมูลคณะอนุกรรมการ: ปัจจุบันระบบแสดงข้อมูลได้เฉพาะบางวาระที่ทางผู้จัดทำสามารถเข้าถึงได้เท่านั้น ยังไม่ใช่ข้อมูลย้อนหลังทั้งหมด
+                    </p>
+
+                    <p className="text-slate-500 text-sm">
+                        <span className="font-semibold text-slate-700 block mb-1">ข้อเสนอแนะเพื่อการพัฒนา:</span>
+                        ทางเราขอเรียกร้องให้สำนักงานประกันสังคม เปิดเผยข้อมูลในรูปแบบที่พร้อมนำไปประมวลผลต่อได้ (Machine-Readable) เพื่อให้ภาคประชาชนสามารถนำไปวิเคราะห์ ตรวจสอบ และร่วมกันพัฒนาการแสดงผลข้อมูลให้สมบูรณ์และเป็นประโยชน์ต่อสาธารณะยิ่งขึ้น
                     </p>
 
                     <button
