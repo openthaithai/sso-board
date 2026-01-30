@@ -148,12 +148,24 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
             }
         });
 
+        const ministerStats: any[] = []; // Use any to bypass strict type check against MemberStats for now, or define a compatible interface
+
         personCabinets.forEach((cabs, name) => {
             const sortedCabs = Array.from(cabs).sort((a, b) => a - b);
             const total = sortedCabs.length;
             let maxCon = 0;
             let currentCon = 0;
             let prevCab = -1;
+
+            const history: Record<number, string> = {};
+            // Find latest position for each cabinet
+            const personRecords = filtered.filter(m => m.full_name === name);
+            sortedCabs.forEach(cab => {
+                const record = personRecords.find(r => parseInt(r.cabinet) === cab);
+                if (record) {
+                    history[cab] = record.position;
+                }
+            });
 
             for (const c of sortedCabs) {
                 if (prevCab === -1 || c === prevCab + 1) {
@@ -166,6 +178,20 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
             }
             maxCon = Math.max(maxCon, currentCon);
             stats.set(name, { total, maxConsecutive: maxCon });
+
+            ministerStats.push({
+                name: name,
+                totalYears: total,
+                maxConsecutive: maxCon,
+                years: sortedCabs,
+                history: history,
+                // Optional fields
+                typeHistory: {},
+                types: [],
+                committeeHistory: {},
+                committees: [],
+                uniqueRoles: []
+            });
         });
 
         const sorted = [...filtered].sort((a, b) => {
@@ -182,7 +208,7 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
 
         const uniqueCount = new Set(sorted.map(m => m.full_name)).size;
 
-        return { filteredMinisters: sorted, uniqueMinisterCount: uniqueCount };
+        return { filteredMinisters: sorted, uniqueMinisterCount: uniqueCount, ministerStats };
     };
 
     const cabinetPMs = useMemo(() => {

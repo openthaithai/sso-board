@@ -77,7 +77,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     const statsData = getStats(selectedCommittee, searchQuery, sortBy, selectedYear);
 
     // 2. Minister Stats
-    const { filteredMinisters, uniqueMinisterCount } = getFilteredMinisters(
+    const { filteredMinisters, uniqueMinisterCount, ministerStats } = getFilteredMinisters(
         selectedMinistry,
         selectedCabinet,
         ministerSearchQuery,
@@ -204,8 +204,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                     }}
                 />
 
-                {/* View Toggle - Only show when in SSO Table mode */}
-                {activeTab === 'sso' && (
+                {/* View Toggle - Show for both tabs */}
+                {(activeTab === 'sso' || activeTab === 'minister') && (
                     <div className="flex justify-end my-4">
                         <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
                             <button
@@ -234,13 +234,37 @@ const App = ({ baseUrl = '/' }: AppProps) => {
 
                 {/* Main Content Area */}
                 {activeTab === 'minister' ? (
-                    <MinisterTable
-                        ministers={filteredMinisters}
-                        isLoading={isMinisterLoading}
-                        timelineCabinets={timelineCabinets}
-                        ministerHistory={ministerHistory}
-                        cabinetPMs={cabinetPMs}
-                    />
+                    viewMode === 'table' ? (
+                        <MinisterTable
+                            ministers={filteredMinisters}
+                            isLoading={isMinisterLoading}
+                            timelineCabinets={timelineCabinets}
+                            ministerHistory={ministerHistory}
+                            cabinetPMs={cabinetPMs}
+                        />
+                    ) : (
+                        /* Minister Bubble Chart */
+                        <div className="fixed inset-0 z-40 bg-slate-900 flex flex-col">
+                            <div className="absolute top-4 right-4 z-50 flex gap-2">
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full text-sm font-medium transition-all border border-white/20 shadow-lg"
+                                >
+                                    <List size={18} />
+                                    Switch to Table View
+                                </button>
+                            </div>
+
+                            <BubbleChart
+                                members={ministerStats}
+                                baseUrl={baseUrl}
+                                onMemberClick={(member) => {
+                                    // Construct a mock MemberStats for the modal if needed, or update Modal to handle minister data
+                                    setSelectedMember(member as MemberStats);
+                                }}
+                            />
+                        </div>
+                    )
                 ) : isSSOLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-sm border border-slate-200">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
@@ -290,7 +314,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         <BubbleChart
                             members={statsData.members}
                             baseUrl={baseUrl}
-                            onMemberClick={(member) => setSelectedMember(member)}
+                            imageSubDir="images/ministers"
+                            onMemberClick={(member) => setSelectedMember(member as MemberStats)}
                         />
                     </div>
                 )}
@@ -344,6 +369,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                 selectedMember={selectedMember}
                 setSelectedMember={setSelectedMember}
                 baseUrl={baseUrl}
+                mode={activeTab}
             />
         </div>
     );
