@@ -89,13 +89,92 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     const [ministerSortBy, setMinisterSortBy] = useState<'total' | 'consecutive'>('total');
     const [isMinisterLoading, setIsMinisterLoading] = useState<boolean>(false);
 
+    // --- Ministers CSV Parsing ---
+    const THAI_MONTHS = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+
+    const parseThaiDate = (dateStr: string): string | null => {
+        if (!dateStr || !dateStr.trim()) return null;
+        const parts = dateStr.trim().split(' ');
+        if (parts.length < 3) return null;
+
+        const day = parts[0];
+        const monthStr = parts[1];
+        const yearBE = parseInt(parts[2]);
+
+        const monthIndex = THAI_MONTHS.indexOf(monthStr);
+        if (monthIndex === -1 || isNaN(yearBE)) return null;
+
+        const yearAD = yearBE - 543;
+        const monthAD = (monthIndex + 1).toString().padStart(2, '0');
+        const dayAD = day.padStart(2, '0');
+
+        return `${yearAD}-${monthAD}-${dayAD}`;
+    };
+
+    const parseMinisterCSV = (csvText: string): MinisterRecord[] => {
+        const lines = csvText.trim().split('\n');
+        const records: MinisterRecord[] = [];
+
+        // Skip header (line 0)
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            // Simple comma split (assuming no commas in fields for now based on file sample)
+            const cols = line.split(',').map(c => c.trim());
+
+            // Expected columns: [0]Cab, [1]PM, [2]Name, [3]Ministry/Role, [4]Start, [5]End, [6]Party
+            if (cols.length < 6) continue;
+
+            const cabinet = cols[0];
+            const fullName = cols[2];
+            const rawRole = cols[3];
+            const startDate = parseThaiDate(cols[4]) || '';
+            const endDate = cols[5] ? parseThaiDate(cols[5]) : null;
+
+            let position = "รัฐมนตรีว่าการ";
+            let ministry = rawRole;
+
+            if (rawRole === "นายกรัฐมนตรี") {
+                position = "นายกรัฐมนตรี";
+                ministry = "สำนักนายกรัฐมนตรี";
+            } else if (rawRole === "รองนายกรัฐมนตรี") {
+                position = "รองนายกรัฐมนตรี";
+                ministry = "สำนักนายกรัฐมนตรี";
+            } else if (rawRole === "สำนักนายกรัฐมนตรี") {
+                position = "รัฐมนตรีประจำ";
+                ministry = "สำนักนายกรัฐมนตรี";
+            } else if (rawRole.startsWith("กระทรวง")) {
+                position = "รัฐมนตรีว่าการ";
+                ministry = rawRole;
+            } else {
+                // Fallback for others
+                ministry = rawRole;
+            }
+
+            records.push({
+                cabinet,
+                full_name: fullName,
+                position,
+                ministry,
+                start_date: startDate,
+                end_date: endDate
+            });
+        }
+        return records;
+    };
+
     useEffect(() => {
         const fetchMinisters = async () => {
             setIsMinisterLoading(true);
             try {
-                const response = await fetch(`${baseUrl}/data/ministers.json`);
+                const response = await fetch(`${baseUrl}/data/ministers.csv`);
                 if (!response.ok) throw new Error('Failed to fetch ministers');
-                const data = await response.json();
+                const text = await response.text();
+                const data = parseMinisterCSV(text);
                 setMinistersData(data);
             } catch (error) {
                 console.error("Error loading ministers:", error);
