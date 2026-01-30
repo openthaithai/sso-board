@@ -70,7 +70,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                         <div className="min-w-0">
                                             <div className="text-sm font-medium text-slate-700 truncate">{minister.full_name}</div>
                                             <div className="text-xs text-slate-500 truncate flex items-center gap-1">
-                                                <Briefcase size={10} /> {minister.position} {minister.ministry}
+                                                <Briefcase size={10} /> [ชุดที่ {minister.cabinet}] {minister.position} {minister.ministry}
                                             </div>
                                         </div>
                                     </div>
@@ -121,7 +121,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                 </div>
                                 <div>
                                     <div className="font-medium text-slate-700">{minister.full_name}</div>
-                                    <div className="text-xs text-slate-400">ครม. {minister.cabinet}</div>
+                                    <div className="text-xs text-slate-400">[ชุดที่ {minister.cabinet}] {minister.position}</div>
                                 </div>
                             </div>
                             {minister.end_date ? (
