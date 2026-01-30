@@ -1,5 +1,5 @@
 import { User, Building2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export interface MinisterRecord {
     cabinet: string;
@@ -17,6 +17,25 @@ interface MinisterTableProps {
     timelineCabinets: string[];
     ministerHistory: Record<string, string[]>;
 }
+
+const MinisterAvatar = ({ name, size = 32 }: { name: string, size?: number }) => {
+    const [hasError, setHasError] = useState(false);
+    const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+    const imageUrl = `${baseUrl}images/ministers/${name}.jpg`;
+
+    if (hasError) {
+        return <User size={size} />;
+    }
+
+    return (
+        <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover"
+            onError={() => setHasError(true)}
+        />
+    );
+};
 
 const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory }: MinisterTableProps) => {
 
@@ -93,7 +112,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
 
                     {/* Rows */}
                     <div className="space-y-4">
-                        {groupedMinisters.map((person, idx) => {
+                        {groupedMinisters.map((person) => {
                             const history = ministerHistory[person.full_name] || [];
 
                             return (
@@ -102,7 +121,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                     {/* Info Column - Enhanced with Rich Details */}
                                     <div className="w-[450px] flex-shrink-0 pr-8 flex gap-4">
                                         <div className="w-16 h-16 flex-shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200 mt-1">
-                                            <User size={32} />
+                                            <MinisterAvatar name={person.full_name} size={32} />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="text-xl font-bold text-slate-800 mb-1">{person.full_name}</div>
@@ -173,8 +192,8 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                 {groupedMinisters.map((person, idx) => (
                     <div key={`m-${idx}`} className="p-4 space-y-3">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                <User size={24} />
+                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden border border-slate-200">
+                                <MinisterAvatar name={person.full_name} size={24} />
                             </div>
                             <div>
                                 <div className="font-bold text-lg text-slate-700">{person.full_name}</div>
