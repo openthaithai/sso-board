@@ -86,6 +86,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
         return params.get('cabinet') || 'All';
     });
     const [ministerSearchQuery, setMinisterSearchQuery] = useState<string>('');
+    const [ministerSortBy, setMinisterSortBy] = useState<'total' | 'consecutive'>('total');
     const [isMinisterLoading, setIsMinisterLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -185,8 +186,12 @@ const App = ({ baseUrl = '/' }: AppProps) => {
         return history;
     }, [ministersData]);
 
+
+
+    // --- Minister Stats & Sorting ---
     const filteredMinisters = useMemo(() => {
-        return ministersData.filter(m => {
+        // 1. Filter first
+        const filtered = ministersData.filter(m => {
             const matchesMinistry = selectedMinistry === 'All' || m.ministry === selectedMinistry;
             const matchesCabinet = selectedCabinet === 'All' || m.cabinet === selectedCabinet;
             const q = ministerSearchQuery.toLowerCase();
@@ -196,11 +201,64 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                 m.ministry.toLowerCase().includes(q) ||
                 m.cabinet.includes(q);
             return matchesMinistry && matchesCabinet && matchesSearch;
-        }).sort((a, b) => {
-            // Sort by start_date DESC
+        });
+
+        // 2. Calculate Stats for these filtered people
+        const stats = new Map<string, { total: number, maxConsecutive: number }>();
+
+        // Group cabinets by person
+        const personCabinets = new Map<string, Set<number>>();
+        filtered.forEach(m => {
+            if (!personCabinets.has(m.full_name)) {
+                personCabinets.set(m.full_name, new Set());
+            }
+            const cabNum = parseInt(m.cabinet);
+            if (!isNaN(cabNum)) {
+                personCabinets.get(m.full_name)!.add(cabNum);
+            }
+        });
+
+        personCabinets.forEach((cabs, name) => {
+            const sortedCabs = Array.from(cabs).sort((a, b) => a - b);
+            const total = sortedCabs.length;
+
+            let maxCon = 0;
+            let currentCon = 0;
+            let prevCab = -1;
+
+            for (const c of sortedCabs) {
+                if (prevCab === -1 || c === prevCab + 1) {
+                    currentCon++;
+                } else {
+                    maxCon = Math.max(maxCon, currentCon);
+                    currentCon = 1;
+                }
+                prevCab = c;
+            }
+            maxCon = Math.max(maxCon, currentCon);
+
+            stats.set(name, { total, maxConsecutive: maxCon });
+        });
+
+        // 3. Sort
+        return filtered.sort((a, b) => {
+            const statsA = stats.get(a.full_name) || { total: 0, maxConsecutive: 0 };
+            const statsB = stats.get(b.full_name) || { total: 0, maxConsecutive: 0 };
+
+            if (ministerSortBy === 'total') {
+                if (statsB.total !== statsA.total) return statsB.total - statsA.total;
+            } else if (ministerSortBy === 'consecutive') {
+                if (statsB.maxConsecutive !== statsA.maxConsecutive) return statsB.maxConsecutive - statsA.maxConsecutive;
+            }
+
+            // Default tie-breaker: Start Date DESC
             return new Date(b.start_date || '').getTime() - new Date(a.start_date || '').getTime();
         });
-    }, [ministersData, selectedMinistry, selectedCabinet, ministerSearchQuery]);
+    }, [ministersData, selectedMinistry, selectedCabinet, ministerSearchQuery, ministerSortBy]);
+
+    const uniqueMinisterCount = useMemo(() => {
+        return new Set(filteredMinisters.map(m => m.full_name)).size;
+    }, [filteredMinisters]);
 
     // --- Robust CSV Parsing Logic ---
     const parseCSV = (csvText: string) => {
@@ -528,8 +586,9 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         </div>
 
                         {activeTab === 'minister' && (
-                            <div id='minister-controls' className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <div id='minister-controls' className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                {/* Cabinet Filter */}
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                                     <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                                         <Users size={16} /> เลือกคณะรัฐมนตรี
                                     </label>
@@ -544,7 +603,9 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+
+                                {/* Ministry Filter */}
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                                     <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                                         <Building2 size={16} /> เลือกกระทรวง
                                     </label>
@@ -559,17 +620,48 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+
+                                {/* Search */}
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                                     <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                                         <Search size={16} /> ค้นหา
                                     </label>
                                     <input
                                         type="text"
                                         className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-prompt"
-                                        placeholder="พิมพ์ชื่อรัฐมนตรี, ตำแหน่ง, หรือกระทรวง..."
+                                        placeholder="พิมพ์ชื่อรัฐมนตรี, ตำแหน่ง..."
                                         value={ministerSearchQuery}
                                         onChange={(e) => setMinisterSearchQuery(e.target.value)}
                                     />
+                                </div>
+
+                                {/* Sort */}
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                                    <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
+                                        <BarChart3 size={16} /> เรียงลำดับตาม
+                                    </label>
+                                    <div className="flex bg-slate-100 rounded-lg p-1">
+                                        <button onClick={() => setMinisterSortBy('total')}
+                                            className={`flex-1 py-1 text-xs md:text-sm rounded-md ${ministerSortBy === 'total' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>อยู่นานสุด
+                                        </button>
+                                        <button onClick={() => setMinisterSortBy('consecutive')}
+                                            className={`flex-1 py-1 text-xs md:text-sm rounded-md ${ministerSortBy === 'consecutive' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}>ต่อเนื่องสุด
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Stats */}
+                                <div
+                                    className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 flex flex-col justify-center relative overflow-hidden h-full">
+                                    <div className="relative z-10">
+                                        <div className="text-sm text-blue-600 font-medium">พบข้อมูล (ท่าน)</div>
+                                        <div className="text-3xl font-bold text-slate-800">{uniqueMinisterCount}</div>
+                                        <div className="text-[10px] text-slate-500 mt-1 truncate">
+                                            {selectedCabinet !== 'All' ? `เฉพาะคณะที่ ${selectedCabinet}` : 'แสดงทุกคณะ'}
+                                        </div>
+                                    </div>
+                                    <FileText
+                                        className="absolute right-1 bottom-1 text-blue-100 w-12 h-12 pointer-events-none opacity-50" />
                                 </div>
                             </div>
                         )}
