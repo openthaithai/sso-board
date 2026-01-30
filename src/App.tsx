@@ -6,9 +6,10 @@ import {
     FileText,
     ExternalLink,
     Search, AlertCircle, Download, X,
-    LayoutGrid, List
+    LayoutGrid, List, Building2, Users
 } from 'lucide-react';
 import BubbleChart from './components/BubbleChart';
+import MinisterTable, { type MinisterRecord } from './components/MinisterTable';
 
 // --- Data from "SSO Report - Board.csv" (Head & Tail only available to AI) ---
 const PRELOADED_CSV = `ปี,ชื่อ-นามสกุล,ตำแหน่ง,ประเภทกรรมการ,คณะกรรมการ
@@ -69,6 +70,141 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     // Removed selectedImage state
     const [viewMode, setViewMode] = useState<'table' | 'bubble'>('table');
     const [selectedMember, setSelectedMember] = useState<MemberStats | null>(null);
+
+    // --- Minister State ---
+    const [activeTab, setActiveTab] = useState<'sso' | 'minister'>(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('view') === 'minister' ? 'minister' : 'sso';
+    });
+    const [ministersData, setMinistersData] = useState<MinisterRecord[]>([]);
+    const [selectedMinistry, setSelectedMinistry] = useState<string>(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('ministry') || 'All';
+    });
+    const [selectedCabinet, setSelectedCabinet] = useState<string>(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('cabinet') || 'All';
+    });
+    const [ministerSearchQuery, setMinisterSearchQuery] = useState<string>('');
+    const [isMinisterLoading, setIsMinisterLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        const fetchMinisters = async () => {
+            setIsMinisterLoading(true);
+            try {
+                const response = await fetch(`${baseUrl}/data/ministers.json`);
+                if (!response.ok) throw new Error('Failed to fetch ministers');
+                const data = await response.json();
+                setMinistersData(data);
+            } catch (error) {
+                console.error("Error loading ministers:", error);
+            } finally {
+                setIsMinisterLoading(false);
+            }
+        };
+
+        if (activeTab === 'minister' && ministersData.length === 0) {
+            fetchMinisters();
+        }
+    }, [activeTab, baseUrl, ministersData.length]);
+
+    // --- URL Sync ---
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const currentView = params.get('view');
+        const currentMinistry = params.get('ministry');
+        const currentCabinet = params.get('cabinet');
+
+        let updated = false;
+
+        if (activeTab === 'minister') {
+            if (currentView !== 'minister') {
+                params.set('view', 'minister');
+                updated = true;
+            }
+        } else {
+            if (currentView) {
+                params.delete('view');
+                updated = true;
+            }
+        }
+
+        if (selectedMinistry !== 'All') {
+            if (currentMinistry !== selectedMinistry) {
+                params.set('ministry', selectedMinistry);
+                updated = true;
+            }
+        } else {
+            if (currentMinistry) {
+                params.delete('ministry');
+                updated = true;
+            }
+        }
+
+        if (selectedCabinet !== 'All') {
+            if (currentCabinet !== selectedCabinet) {
+                params.set('cabinet', selectedCabinet);
+                updated = true;
+            }
+        } else {
+            if (currentCabinet) {
+                params.delete('cabinet');
+                updated = true;
+            }
+        }
+
+        if (updated) {
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState(null, '', newUrl);
+        }
+    }, [activeTab, selectedMinistry, selectedCabinet]);
+
+    const ministries = useMemo(() => {
+        const list = Array.from(new Set(ministersData.map(m => m.ministry))).sort();
+        return ['All', ...list];
+    }, [ministersData]);
+
+    const cabinets = useMemo(() => {
+        const list = Array.from(new Set(ministersData.map(m => m.cabinet))).sort((a, b) => Number(b) - Number(a));
+        return ['All', ...list];
+    }, [ministersData]);
+
+    const filteredMinisters = useMemo(() => {
+        return ministersData.filter(m => {
+            const matchesMinistry = selectedMinistry === 'All' || m.ministry === selectedMinistry;
+            const matchesCabinet = selectedCabinet === 'All' || m.cabinet === selectedCabinet;
+            const q = ministerSearchQuery.toLowerCase();
+            const matchesSearch = q === '' ||
+                m.full_name.toLowerCase().includes(q) ||
+                m.position.toLowerCase().includes(q) ||
+                m.ministry.toLowerCase().includes(q) ||
+                m.cabinet.includes(q);
+            return matchesMinistry && matchesCabinet && matchesSearch;
+        }).sort((a, b) => {
+            // Sort by start_date DESC
+            return new Date(b.start_date || '').getTime() - new Date(a.start_date || '').getTime();
+        });
+    }, [ministersData, selectedMinistry, selectedCabinet, ministerSearchQuery]);
+
+    const { minYear, maxYear } = useMemo(() => {
+        if (ministersData.length === 0) return { minYear: new Date().getFullYear(), maxYear: new Date().getFullYear() };
+        const years = ministersData.flatMap(m => {
+            const start = new Date(m.start_date).getFullYear(); // Use .getFullYear() - 543 if converting Thai year, but data is 2023. Assuming ISO.
+            // Wait, sample data is 2023-09-05.
+            // Need to check if requirements imply Thai years for display but JSON is ISO.
+            // Assuming JSON is ISO: 2023, 2024.
+            // Display needs to show Thai years?
+            // Existing SSO uses 2566.
+            // Let's assume we map standard years to Thai years for display later, or check data format.
+            // Sample data: "2023-09-05".
+            // Let's use Thai years for MIN/MAX calculation if we want to match the 25xx timeline.
+            // Let's convert to Thai year for calculation: +543
+            const startThai = start + 543;
+            const end = m.end_date ? new Date(m.end_date).getFullYear() + 543 : new Date().getFullYear() + 543;
+            return [startThai, end];
+        });
+        return { minYear: Math.min(...years), maxYear: Math.max(...years) };
+    }, [ministersData]);
 
     // --- Robust CSV Parsing Logic ---
     const parseCSV = (csvText: string) => {
@@ -364,8 +500,73 @@ const App = ({ baseUrl = '/' }: AppProps) => {
 
                     <div className="max-w-7xl mx-auto space-y-6 flex-grow w-full">
 
+                        {/* Tab Menu */}
+                        <div className="flex justify-center mb-6">
+                            <div className="bg-slate-200 p-1 rounded-full flex gap-1">
+                                <button
+                                    onClick={() => setActiveTab('sso')}
+                                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${activeTab === 'sso' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+                                >
+                                    สำนักงานประกันสังคม
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('minister')}
+                                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${activeTab === 'minister' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+                                >
+                                    รัฐมนตรี
+                                </button>
+                            </div>
+                        </div>
+
+                        {activeTab === 'minister' && (
+                            <div id='minister-controls' className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
+                                        <Users size={16} /> เลือกคณะรัฐมนตรี
+                                    </label>
+                                    <select
+                                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-prompt"
+                                        value={selectedCabinet}
+                                        onChange={(e) => setSelectedCabinet(e.target.value)}
+                                    >
+                                        <option value="All">ทุกคณะ (All Cabinets)</option>
+                                        {cabinets.map(c => (
+                                            <option key={c} value={c}>{c === 'All' ? 'ทุกคณะ' : `คณะที่ ${c}`}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
+                                        <Building2 size={16} /> เลือกกระทรวง
+                                    </label>
+                                    <select
+                                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-prompt"
+                                        value={selectedMinistry}
+                                        onChange={(e) => setSelectedMinistry(e.target.value)}
+                                    >
+                                        <option value="All">แสดงทั้งหมด (All Ministries)</option>
+                                        {ministries.map(m => (
+                                            <option key={m} value={m}>{m === 'All' ? 'แสดงทั้งหมด' : m}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
+                                        <Search size={16} /> ค้นหา
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-prompt"
+                                        placeholder="พิมพ์ชื่อรัฐมนตรี, ตำแหน่ง, หรือกระทรวง..."
+                                        value={ministerSearchQuery}
+                                        onChange={(e) => setMinisterSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Controls Grid */}
-                        <div id='table' className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div id='table' className={`${activeTab === 'sso' ? 'grid' : 'hidden'} grid-cols-1 md:grid-cols-5 gap-4`}>
 
                             <div className="md:col-span-1 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
@@ -442,33 +643,42 @@ const App = ({ baseUrl = '/' }: AppProps) => {
 
 
                         {/* View Toggle - Only show when in Table mode (or let the floating button handle Bubble mode) */}
-                        <div className="flex justify-end my-4">
-                            <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
-                                <button
-                                    onClick={() => setViewMode('table')}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'table'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
-                                        }`}
-                                >
-                                    <List size={18} />
-                                    Table View
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('bubble')}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'bubble'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
-                                        }`}
-                                >
-                                    <LayoutGrid size={18} />
-                                    Bubble Mode
-                                </button>
+                        {activeTab === 'sso' && (
+                            <div className="flex justify-end my-4">
+                                <div className="bg-slate-100 p-1 rounded-lg flex gap-1">
+                                    <button
+                                        onClick={() => setViewMode('table')}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'table'
+                                            ? 'bg-white text-blue-600 shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                            }`}
+                                    >
+                                        <List size={18} />
+                                        Table View
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('bubble')}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'bubble'
+                                            ? 'bg-white text-blue-600 shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                            }`}
+                                    >
+                                        <LayoutGrid size={18} />
+                                        Bubble Mode
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Main Content Area */}
-                        {viewMode === 'table' ? (
+                        {activeTab === 'minister' ? (
+                            <MinisterTable
+                                ministers={filteredMinisters}
+                                isLoading={isMinisterLoading}
+                                minYear={minYear}
+                                maxYear={maxYear}
+                            />
+                        ) : viewMode === 'table' ? (
                             /* Timeline Matrix (Existing) */
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
                                 <div

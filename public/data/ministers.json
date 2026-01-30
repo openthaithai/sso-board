@@ -1,0 +1,82 @@
+[
+    {
+        "cabinet": "63",
+        "full_name": "เศรษฐา ทวีสิน",
+        "position": "นายกรัฐมนตรี",
+        "ministry": "สำนักนายกรัฐมนตรี",
+        "start_date": "2023-09-05",
+        "end_date": "2024-08-14"
+    },
+    {
+        "cabinet": "63",
+        "full_name": "ภูมิธรรม เวชยชัย",
+        "position": "รองนายกรัฐมนตรี",
+        "ministry": "สำนักนายกรัฐมนตรี",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "สมศักดิ์ เทพสุทิน",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงสาธารณสุข",
+        "start_date": "2024-05-07",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "อนุทิน ชาญวีรกูล",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงมหาดไทย",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "พีระพันธุ์ สาลีรัฐวิภาค",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงพลังงาน",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "พิชัย ชุณหวชิร",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงการคลัง",
+        "start_date": "2024-04-28",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "ประเสริฐ จันทรรวงทอง",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงดิจิทัลเพื่อเศรษฐกิจและสังคม",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "พล.ต.อ. เพิ่มพูน ชิดชอบ",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงศึกษาธิการ",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "พิพัฒน์ รัชกิจประการ",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงแรงงาน",
+        "start_date": "2023-09-05",
+        "end_date": null
+    },
+    {
+        "cabinet": "63",
+        "full_name": "ศุภมาส อิศรภักดี",
+        "position": "รัฐมนตรีว่าการ",
+        "ministry": "กระทรวงการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม",
+        "start_date": "2023-09-05",
+        "end_date": null
+    }
+]
