@@ -276,16 +276,29 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     }, [allYears]);
 
     const handleDownloadJSON = () => {
-        if (rawData.length === 0) return;
-        const dataStr = JSON.stringify(rawData, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "sso_board_data.json";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        if (activeTab === 'minister') {
+            if (ministersData.length === 0) return;
+            const dataStr = JSON.stringify(ministersData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "ministers_data.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            if (rawData.length === 0) return;
+            const dataStr = JSON.stringify(rawData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "sso_board_data.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     };
 
     // --- Statistics Calculation ---
@@ -473,7 +486,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         <div
                             className="relative flex items-center justify-center py-16 md:py-24 border-r-0 md:border-r-2 border-white/30">
                             <div className="text-center px-8">
-                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white" style={{ lineHeight: '1.4' }}>บอร์ดประกันสังคม</h2>
+                                <h2 className="text-4xl md:text-5xl lg:text-6xl text-white" style={{ lineHeight: '1.4' }}>{activeTab === 'minister' ? 'รัฐมนตรี' : 'บอร์ดประกันสังคม'}</h2>
                             </div>
                         </div>
                         <div className="flex items-center justify-center py-16 md:py-24">
@@ -954,7 +967,11 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         ยังอยู่ที่เดิม... <br /> หรือจะเปลี่ยนให้ดีขึ้น?
                     </h1>
                     <p className="text-md md:text-xl bg-white text-[#07253C] py-3 px-10 inline-block rounded">
-                        เลือกตั้งประกันสังคม <span className="text-blue-600">เสียงของคุณมีความหมาย </span>
+                        {activeTab === 'minister' ? (
+                            <>8 กุมภา <span className="text-blue-600">เสียงของคุณมีความหมาย</span></>
+                        ) : (
+                            <>เลือกตั้งประกันสังคม <span className="text-blue-600">เสียงของคุณมีความหมาย</span></>
+                        )}
                     </p>
                 </div>
             </div>
@@ -965,23 +982,35 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                 <div className="max-w-3xl mx-auto space-y-4">
                     <p className="text-slate-500 text-sm">
                         <span className="font-semibold text-slate-700 block mb-1">Disclaimer:</span>
-                        แหล่งที่มาของข้อมูล: <a
-                            href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
-                            target="_blank" rel="noreferrer"
-                            className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
-                                size={12} /></a> <br />
+                        แหล่งที่มาของข้อมูล: {activeTab === 'minister' ? (
+                            <a
+                                href="https://soc.go.th/cabinet-history"
+                                target="_blank" rel="noreferrer"
+                                className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">ทำเนียบคณะรัฐมนตรี สำนักเลขาธิการคณะรัฐมนตรี <ExternalLink
+                                    size={12} /></a>
+                        ) : (
+                            <a
+                                href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
+                                target="_blank" rel="noreferrer"
+                                className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม <ExternalLink
+                                    size={12} /></a>
+                        )} <br />
                         ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
                     </p>
 
                     <p className="text-slate-500 text-sm">
                         <span className="font-semibold text-slate-700 block mb-1">ข้อควรระวังและข้อจำกัดของข้อมูล</span>
-                        การประมวลผล: ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
-                        ข้อมูลคณะอนุกรรมการ: ปัจจุบันระบบแสดงข้อมูลได้เฉพาะบางวาระที่ทางผู้จัดทำสามารถเข้าถึงได้เท่านั้น ยังไม่ใช่ข้อมูลย้อนหลังทั้งหมด
+                        การประมวลผล: ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) หรือข้อมูลสาธารณะ อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
+                        {activeTab === 'minister' ? (
+                            <>ข้อมูลคณะรัฐมนตรี: ปัจจุบันระบบแสดงข้อมูลชุดที่ 63 เป็นต้นไป ตามที่ปรากฏในฐานข้อมูลเปิด</>
+                        ) : (
+                            <>ข้อมูลคณะอนุกรรมการ: ปัจจุบันระบบแสดงข้อมูลได้เฉพาะบางวาระที่ทางผู้จัดทำสามารถเข้าถึงได้เท่านั้น ยังไม่ใช่ข้อมูลย้อนหลังทั้งหมด</>
+                        )}
                     </p>
 
                     <p className="text-slate-500 text-sm">
                         <span className="font-semibold text-slate-700 block mb-1">ข้อเสนอแนะเพื่อการพัฒนา:</span>
-                        ทางเราขอเรียกร้องให้สำนักงานประกันสังคม เปิดเผยข้อมูลในรูปแบบที่พร้อมนำไปประมวลผลต่อได้ (Machine-Readable) เพื่อให้ภาคประชาชนสามารถนำไปวิเคราะห์ ตรวจสอบ และร่วมกันพัฒนาการแสดงผลข้อมูลให้สมบูรณ์และเป็นประโยชน์ต่อสาธารณะยิ่งขึ้น
+                        ทางเราขอเรียกร้องให้หน่วยงานเปิดเผยข้อมูลในรูปแบบที่พร้อมนำไปประมวลผลต่อได้ (Machine-Readable) เพื่อให้ภาคประชาชนสามารถนำไปวิเคราะห์ ตรวจสอบ และร่วมกันพัฒนาการแสดงผลข้อมูลให้สมบูรณ์และเป็นประโยชน์ต่อสาธารณะยิ่งขึ้น
                     </p>
 
                     <button
@@ -990,7 +1019,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Download size={14} />
-                        Download ข้อมูลบอร์ดสำนักงานประกันสังคม (JSON) ที่นำมาแสดงข้อมูล
+                        Download ข้อมูล{activeTab === 'minister' ? 'รัฐมนตรี' : 'บอร์ดสำนักงานประกันสังคม'} (JSON) ที่นำมาแสดงข้อมูล
                     </button>
                 </div>
             </footer>
