@@ -263,6 +263,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             <BubbleChart
                                 members={ministerStats}
                                 baseUrl={baseUrl}
+                                imageSubDir="images/ministers"
                                 onMemberClick={(member) => {
                                     // Construct a mock MemberStats for the modal if needed, or update Modal to handle minister data
                                     setSelectedMember(member as MemberStats);
@@ -311,7 +312,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         <BubbleChart
                             members={statsData.members}
                             baseUrl={baseUrl}
-                            imageSubDir="images/ministers"
+                            imageSubDir="images"
                             onMemberClick={(member) => setSelectedMember(member as MemberStats)}
                         />
                     </div>
