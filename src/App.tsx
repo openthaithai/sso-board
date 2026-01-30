@@ -134,6 +134,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
             const rawRole = cols[3];
             const startDate = parseThaiDate(cols[4]) || '';
             const endDate = cols[5] ? parseThaiDate(cols[5]) : null;
+            const party = cols[6] || 'ไม่สังกัดพรรค';
 
             let position = "รัฐมนตรีว่าการ";
             let ministry = rawRole;
@@ -160,6 +161,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                 full_name: fullName,
                 position,
                 ministry,
+                party,
                 start_date: startDate,
                 end_date: endDate
             });

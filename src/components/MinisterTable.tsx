@@ -6,6 +6,7 @@ export interface MinisterRecord {
     full_name: string;
     position: string;
     ministry: string;
+    party: string;
     start_date: string;
     end_date: string | null;
 }
@@ -124,6 +125,10 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                                         <div className="text-sm text-slate-500 flex items-center gap-1.5 mb-1">
                                                             <Building2 size={14} className="text-slate-400" />
                                                             {role.ministry}
+                                                            <span className="text-slate-300 mx-1">|</span>
+                                                            <span className="text-[11px] text-slate-400 font-normal">
+                                                                {role.party}
+                                                            </span>
                                                         </div>
                                                         <div className="text-xs text-slate-400 font-normal">
                                                             {new Date(role.start_date).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' })}
@@ -191,6 +196,10 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                     </div>
                                     <div className="text-xs text-slate-500 flex items-center gap-1.5 mb-1">
                                         <Building2 size={12} className="text-slate-400" /> {role.ministry}
+                                        <span className="text-slate-300 mx-1">|</span>
+                                        <span className="text-[10px] text-slate-400">
+                                            {role.party}
+                                        </span>
                                     </div>
                                     <div className="text-[10px] text-slate-400 font-normal">
                                         {new Date(role.start_date).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' })}
