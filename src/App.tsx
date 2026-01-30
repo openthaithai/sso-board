@@ -161,12 +161,28 @@ const App = ({ baseUrl = '/' }: AppProps) => {
 
     const ministries = useMemo(() => {
         const list = Array.from(new Set(ministersData.map(m => m.ministry))).sort();
-        return ['All', ...list];
+        return list;
     }, [ministersData]);
 
     const cabinets = useMemo(() => {
         const list = Array.from(new Set(ministersData.map(m => m.cabinet))).sort((a, b) => Number(b) - Number(a));
-        return ['All', ...list];
+        return list;
+    }, [ministersData]);
+
+    const timelineCabinets = useMemo(() => {
+        const list = Array.from(new Set(ministersData.map(m => m.cabinet))).sort((a, b) => Number(a) - Number(b));
+        return list;
+    }, [ministersData]);
+
+    const ministerHistory = useMemo(() => {
+        const history: Record<string, string[]> = {};
+        ministersData.forEach(m => {
+            if (!history[m.full_name]) history[m.full_name] = [];
+            if (!history[m.full_name].includes(m.cabinet)) {
+                history[m.full_name].push(m.cabinet);
+            }
+        });
+        return history;
     }, [ministersData]);
 
     const filteredMinisters = useMemo(() => {
@@ -185,26 +201,6 @@ const App = ({ baseUrl = '/' }: AppProps) => {
             return new Date(b.start_date || '').getTime() - new Date(a.start_date || '').getTime();
         });
     }, [ministersData, selectedMinistry, selectedCabinet, ministerSearchQuery]);
-
-    const { minYear, maxYear } = useMemo(() => {
-        if (ministersData.length === 0) return { minYear: new Date().getFullYear(), maxYear: new Date().getFullYear() };
-        const years = ministersData.flatMap(m => {
-            const start = new Date(m.start_date).getFullYear(); // Use .getFullYear() - 543 if converting Thai year, but data is 2023. Assuming ISO.
-            // Wait, sample data is 2023-09-05.
-            // Need to check if requirements imply Thai years for display but JSON is ISO.
-            // Assuming JSON is ISO: 2023, 2024.
-            // Display needs to show Thai years?
-            // Existing SSO uses 2566.
-            // Let's assume we map standard years to Thai years for display later, or check data format.
-            // Sample data: "2023-09-05".
-            // Let's use Thai years for MIN/MAX calculation if we want to match the 25xx timeline.
-            // Let's convert to Thai year for calculation: +543
-            const startThai = start + 543;
-            const end = m.end_date ? new Date(m.end_date).getFullYear() + 543 : new Date().getFullYear() + 543;
-            return [startThai, end];
-        });
-        return { minYear: Math.min(...years), maxYear: Math.max(...years) };
-    }, [ministersData]);
 
     // --- Robust CSV Parsing Logic ---
     const parseCSV = (csvText: string) => {
@@ -531,7 +527,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                     >
                                         <option value="All">ทุกคณะ (All Cabinets)</option>
                                         {cabinets.map(c => (
-                                            <option key={c} value={c}>{c === 'All' ? 'ทุกคณะ' : `คณะที่ ${c}`}</option>
+                                            <option key={c} value={c}>คณะที่ {c}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -546,7 +542,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                     >
                                         <option value="All">แสดงทั้งหมด (All Ministries)</option>
                                         {ministries.map(m => (
-                                            <option key={m} value={m}>{m === 'All' ? 'แสดงทั้งหมด' : m}</option>
+                                            <option key={m} value={m}>{m}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -675,8 +671,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             <MinisterTable
                                 ministers={filteredMinisters}
                                 isLoading={isMinisterLoading}
-                                minYear={minYear}
-                                maxYear={maxYear}
+                                timelineCabinets={timelineCabinets}
+                                ministerHistory={ministerHistory}
                             />
                         ) : viewMode === 'table' ? (
                             /* Timeline Matrix (Existing) */

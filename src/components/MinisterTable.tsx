@@ -12,16 +12,11 @@ export interface MinisterRecord {
 interface MinisterTableProps {
     ministers: MinisterRecord[];
     isLoading: boolean;
-    minYear: number;
-    maxYear: number;
+    timelineCabinets: string[];
+    ministerHistory: Record<string, string[]>;
 }
 
-const MinisterTable = ({ ministers, isLoading, minYear, maxYear }: MinisterTableProps) => {
-
-    const years = [];
-    for (let y = minYear; y <= maxYear; y++) {
-        years.push(y);
-    }
+const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory }: MinisterTableProps) => {
 
     if (isLoading) {
         return (
@@ -49,11 +44,10 @@ const MinisterTable = ({ ministers, isLoading, minYear, maxYear }: MinisterTable
                     {/* Header */}
                     <div className="flex mb-2 border-b border-slate-100 pb-2">
                         <div className="w-80 flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อรัฐมนตรี</div>
-                        <div className="w-32 flex-shrink-0 text-center text-xs font-semibold text-slate-500">สังกัด</div>
                         <div className="flex-1 flex gap-1">
-                            {years.map(year => (
-                                <div key={year} className="flex-1 min-w-[30px] text-center text-xs text-slate-500 font-medium">
-                                    {year}
+                            {timelineCabinets.map(cabinet => (
+                                <div key={cabinet} className="flex-1 min-w-[30px] text-center text-xs text-slate-500 font-medium">
+                                    {cabinet}
                                 </div>
                             ))}
                         </div>
@@ -62,8 +56,7 @@ const MinisterTable = ({ ministers, isLoading, minYear, maxYear }: MinisterTable
                     {/* Rows */}
                     <div className="space-y-1">
                         {ministers.map((minister, idx) => {
-                            const startYear = new Date(minister.start_date).getFullYear() + 543;
-                            const endYear = minister.end_date ? new Date(minister.end_date).getFullYear() + 543 : new Date().getFullYear() + 543;
+                            const history = ministerHistory[minister.full_name] || [];
 
                             return (
                                 <div key={`${minister.cabinet}-${minister.full_name}-${idx}`} className="flex items-center hover:bg-slate-50 transition-colors py-3 border-b border-slate-50 last:border-0 group">
@@ -77,28 +70,18 @@ const MinisterTable = ({ ministers, isLoading, minYear, maxYear }: MinisterTable
                                         <div className="min-w-0">
                                             <div className="text-sm font-medium text-slate-700 truncate">{minister.full_name}</div>
                                             <div className="text-xs text-slate-500 truncate flex items-center gap-1">
-                                                <Briefcase size={10} /> {minister.position}
-                                            </div>
-                                            <div className="text-xs text-slate-400 truncate mt-0.5">
-                                                ครม. ชุดที่ {minister.cabinet}
+                                                <Briefcase size={10} /> {minister.position} {minister.ministry}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Ministry Column */}
-                                    <div className="w-32 flex-shrink-0 text-center px-2">
-                                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 truncate max-w-full" title={minister.ministry}>
-                                            {minister.ministry}
-                                        </span>
-                                    </div>
-
                                     {/* Timeline Grid */}
                                     <div className="flex-1 flex gap-1 h-8">
-                                        {years.map(year => {
-                                            const isActive = year >= startYear && year <= endYear;
+                                        {timelineCabinets.map(cabinet => {
+                                            const isActive = history.includes(cabinet);
 
                                             return (
-                                                <div key={year} className={`flex-1 min-w-[30px] flex items-center justify-center relative group/cell ${isActive ? 'cursor-default' : ''}`}>
+                                                <div key={cabinet} className={`flex-1 min-w-[30px] flex items-center justify-center relative group/cell ${isActive ? 'cursor-default' : ''}`}>
                                                     {isActive ? (
                                                         <>
                                                             <span className="text-lg leading-none select-none filter transition-all hover:scale-125">
@@ -107,9 +90,9 @@ const MinisterTable = ({ ministers, isLoading, minYear, maxYear }: MinisterTable
 
                                                             {/* Tooltip */}
                                                             <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/cell:block w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none font-sans z-50">
-                                                                <div className="font-bold text-blue-200">ปี {year}</div>
+                                                                <div className="font-bold text-blue-200">ครม. {cabinet}</div>
                                                                 <div className="mb-1 text-white">{minister.position}</div>
-                                                                <div className="text-slate-300">ครม. {minister.cabinet}</div>
+                                                                <div className="text-slate-300">{minister.ministry}</div>
                                                                 <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
                                                             </div>
                                                         </>
