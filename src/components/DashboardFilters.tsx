@@ -15,6 +15,11 @@ interface SSOFilterProps {
     setSearchQuery: (query: string) => void;
     sortBy: 'total' | 'consecutive' | 'name';
     setSortBy: (sort: 'total' | 'consecutive' | 'name') => void;
+    filterStats: {
+        count: number;
+        minYear: number;
+        maxYear: number;
+    };
 }
 
 interface MinisterFilterProps {
@@ -137,12 +142,13 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
         selectedYear, setSelectedYear, allYears,
         selectedCommittee, setSelectedCommittee, committees,
         searchQuery, setSearchQuery,
-        sortBy, setSortBy
+        sortBy, setSortBy,
+        filterStats
     } = ssoProps;
 
     return (
-        <div id='table' className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <div id='table' className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                     <Calendar size={16} /> เลือกปีที่ดำรงตำแหน่ง
                 </label>
@@ -158,7 +164,7 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
                 </select>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                     <Filter size={16} /> เลือกคณะกรรมการ
                 </label>
@@ -173,7 +179,7 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
                 </select>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                     <Search size={16} /> ค้นหาชื่อ
                 </label>
@@ -186,7 +192,7 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
                 />
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                 <label className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-2">
                     <BarChart3 size={16} /> เรียงลำดับตาม
                 </label>
@@ -210,6 +216,18 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
                         ตามชื่อ
                     </button>
                 </div>
+            </div>
+
+            {/* SSO Stats */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 flex flex-col justify-center relative overflow-hidden h-full">
+                <div className="relative z-10">
+                    <div className="text-sm text-blue-600 font-medium">พบข้อมูล (ท่าน)</div>
+                    <div className="text-3xl font-bold text-slate-800">{filterStats.count}</div>
+                    <div className="text-xs text-slate-500 mt-1">
+                        {selectedYear !== 'All' ? `เฉพาะปี ${selectedYear}` : `${filterStats.minYear === 3000 ? '-' : filterStats.minYear} - ${filterStats.maxYear === 0 ? '-' : filterStats.maxYear}`}
+                    </div>
+                </div>
+                <FileText className="absolute right-1 bottom-1 text-blue-100 w-12 h-12 pointer-events-none opacity-50" />
             </div>
         </div>
     );

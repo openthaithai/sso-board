@@ -193,7 +193,12 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         selectedYear, setSelectedYear, allYears,
                         selectedCommittee, setSelectedCommittee, committees,
                         searchQuery, setSearchQuery,
-                        sortBy, setSortBy
+                        sortBy, setSortBy,
+                        filterStats: {
+                            count: statsData.members.length,
+                            minYear: statsData.minYear,
+                            maxYear: statsData.maxYear
+                        }
                     }}
                     ministerProps={{
                         selectedCabinet, setSelectedCabinet, cabinets,
@@ -272,15 +277,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                     </div>
                 ) : viewMode === 'table' ? (
                     <div className="space-y-4">
-                        <div className="md:col-span-1 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 flex flex-col justify-center gap-2 relative overflow-hidden mb-4">
-                            <div className="relative z-10">
-                                <div className="text-sm text-blue-600 font-medium">พบข้อมูล (ท่าน)</div>
-                                <div className="text-3xl font-bold text-slate-800">{statsData.members.length}</div>
-                                <div className="text-xs text-slate-500 mt-1">
-                                    {selectedYear !== 'All' ? `เฉพาะปี ${selectedYear}` : `${statsData.minYear === 3000 ? '-' : statsData.minYear} - ${statsData.maxYear === 0 ? '-' : statsData.maxYear}`}
-                                </div>
-                            </div>
-                        </div>
+
 
                         <MemberTable
                             members={statsData.members}
