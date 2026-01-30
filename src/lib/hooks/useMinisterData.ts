@@ -158,12 +158,15 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
             let prevCab = -1;
 
             const history: Record<number, string> = {};
+            const ministerHistoryDetails: Record<number, any> = {};
+
             // Find latest position for each cabinet
             const personRecords = filtered.filter(m => m.full_name === name);
             sortedCabs.forEach(cab => {
                 const record = personRecords.find(r => parseInt(r.cabinet) === cab);
                 if (record) {
                     history[cab] = record.position;
+                    ministerHistoryDetails[cab] = record;
                 }
             });
 
@@ -190,7 +193,8 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
                 types: [],
                 committeeHistory: {},
                 committees: [],
-                uniqueRoles: []
+                uniqueRoles: [],
+                ministerHistoryDetails: ministerHistoryDetails
             });
         });
 

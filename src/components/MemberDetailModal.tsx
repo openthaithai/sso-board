@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Building2 } from 'lucide-react';
 import type { MemberStats } from '../lib/hooks/useSSOData';
 
 interface MemberDetailModalProps {
@@ -7,9 +7,10 @@ interface MemberDetailModalProps {
     setSelectedMember: (member: MemberStats | null) => void;
     baseUrl: string;
     mode?: 'sso' | 'minister';
+    cabinetPMs?: Record<string, string>;
 }
 
-const MemberDetailModal: React.FC<MemberDetailModalProps> = ({ selectedMember, setSelectedMember, baseUrl, mode = 'sso' }) => {
+const MemberDetailModal: React.FC<MemberDetailModalProps> = ({ selectedMember, setSelectedMember, baseUrl, mode = 'sso', cabinetPMs = {} }) => {
     if (!selectedMember) return null;
 
     const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
@@ -50,26 +51,57 @@ const MemberDetailModal: React.FC<MemberDetailModalProps> = ({ selectedMember, s
 
                     <div className="w-full space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
                         {/* Iterate history in reverse chronological order */}
-                        {selectedMember.years.slice().sort((a, b) => b - a).map(year => (
-                            <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0">
-                                <div className="font-bold text-slate-500 w-16 flex-shrink-0">
-                                    {mode === 'minister' ? `ชุดที่ ${year}` : year}
-                                </div>
-                                <div className="text-left text-slate-700">
-                                    <div className="font-medium">{selectedMember.history[year]}</div>
-                                    {/* For SSO, show committees. For Minister, show Ministry/Party if avail in history? 
-                                        Currently MinisterStats doesn't populate committeeHistory. 
-                                        But we could fetch ministry info if needed. 
-                                        For now, hide committee loop if empty.
-                                     */}
-                                    {selectedMember.committeeHistory && selectedMember.committeeHistory[year]?.map((comm, i) => (
-                                        <div key={i} className="text-xs text-slate-500 mt-0.5">
-                                            ({comm})
+                        {selectedMember.years.slice().sort((a, b) => b - a).map(year => {
+                            const ministerDetail = selectedMember.ministerHistoryDetails?.[year];
+
+                            if (mode === 'minister' && ministerDetail) {
+                                return (
+                                    <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0 w-full">
+                                        <div className="w-full">
+                                            <div className="flex items-baseline gap-2 mb-1">
+                                                <span
+                                                    className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-md cursor-help flex-shrink-0"
+                                                    title={`นายกรัฐมนตรี: ${cabinetPMs[year] || '-'}`}
+                                                >
+                                                    ชุด {year}
+                                                </span>
+                                                <span className={`text-sm font-bold ${ministerDetail.position.includes('นายก') ? 'text-blue-700' : 'text-slate-700'}`}>
+                                                    {ministerDetail.position}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs text-slate-500 flex items-center gap-1.5 mb-1 flex-wrap">
+                                                <Building2 size={12} className="text-slate-400 flex-shrink-0" />
+                                                <span className="truncate max-w-[150px]">{ministerDetail.ministry}</span>
+                                                <span className="text-slate-300 mx-1">|</span>
+                                                <span className="text-[10px] text-slate-400">
+                                                    {ministerDetail.party}
+                                                </span>
+                                            </div>
+                                            <div className="text-[10px] text-slate-400 font-normal pl-5">
+                                                {new Date(ministerDetail.start_date).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' })}
+                                                {' - '}
+                                                {ministerDetail.end_date ? new Date(ministerDetail.end_date).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' }) : 'ปัจจุบัน'}
+                                            </div>
                                         </div>
-                                    ))}
+                                    </div>
+                                );
+                            }
+
+                            // Default SSO View
+                            return (
+                                <div key={year} className="flex gap-3 text-sm border-b border-slate-200 last:border-0 pb-3 last:pb-0">
+                                    <div className="font-bold text-slate-500 w-16 flex-shrink-0">{year}</div>
+                                    <div className="text-left text-slate-700">
+                                        <div className="font-medium">{selectedMember.history[year]}</div>
+                                        {selectedMember.committeeHistory && selectedMember.committeeHistory[year]?.map((comm, i) => (
+                                            <div key={i} className="text-xs text-slate-500 mt-0.5">
+                                                ({comm})
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 

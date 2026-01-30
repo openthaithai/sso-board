@@ -370,6 +370,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                 setSelectedMember={setSelectedMember}
                 baseUrl={baseUrl}
                 mode={activeTab}
+                cabinetPMs={cabinetPMs}
             />
         </div>
     );

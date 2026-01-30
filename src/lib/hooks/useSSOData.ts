@@ -19,6 +19,7 @@ export interface MemberStats {
     committeeHistory: { [year: number]: string[] };
     committees: string[];
     uniqueRoles: string[]; // "Type (Committee)"
+    ministerHistoryDetails?: { [cabinet: string]: any }; // Optional: Full MinisterRecord details for each cabinet
 }
 
 const PRELOADED_CSV = `ปี,ชื่อ-นามสกุล,ตำแหน่ง,ประเภทกรรมการ,คณะกรรมการ
