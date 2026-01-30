@@ -16,6 +16,7 @@ interface MinisterTableProps {
     isLoading: boolean;
     timelineCabinets: string[];
     ministerHistory: Record<string, string[]>;
+    cabinetPMs: Record<string, string>;
 }
 
 const MinisterAvatar = ({ name, size = 32 }: { name: string, size?: number }) => {
@@ -37,7 +38,7 @@ const MinisterAvatar = ({ name, size = 32 }: { name: string, size?: number }) =>
     );
 };
 
-const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory }: MinisterTableProps) => {
+const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory, cabinetPMs }: MinisterTableProps) => {
 
     const groupedMinisters = useMemo(() => {
         const groups = new Map<string, {
@@ -134,7 +135,10 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                                     <div key={rIdx} className="relative pl-6">
                                                         <div className="absolute -left-[11px] top-1.5 w-4 h-4 bg-slate-200 rounded-full border-4 border-white"></div>
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded uppercase">
+                                                            <span
+                                                                className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded uppercase cursor-help"
+                                                                title={`นายกรัฐมนตรี: ${cabinetPMs[role.cabinet] || '-'}`}
+                                                            >
                                                                 ชุด {role.cabinet}
                                                             </span>
                                                             <span className={`text-base font-bold ${role.position.includes('นายก') ? 'text-blue-700' : 'text-slate-700'}`}>
@@ -206,7 +210,10 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                 <div key={rIdx} className="relative pl-5">
                                     <div className="absolute -left-[23px] top-1.5 w-4 h-4 bg-slate-200 rounded-full border-4 border-white"></div>
                                     <div className="flex items-baseline gap-2 mb-1">
-                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-md">
+                                        <span
+                                            className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-md cursor-help"
+                                            title={`นายกรัฐมนตรี: ${cabinetPMs[role.cabinet] || '-'}`}
+                                        >
                                             ชุด {role.cabinet}
                                         </span>
                                         <span className={`text-sm font-bold ${role.position.includes('นายก') ? 'text-blue-700' : 'text-slate-700'}`}>

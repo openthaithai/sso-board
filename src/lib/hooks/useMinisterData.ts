@@ -185,6 +185,16 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
         return { filteredMinisters: sorted, uniqueMinisterCount: uniqueCount };
     };
 
+    const cabinetPMs = useMemo(() => {
+        const pmMap: Record<string, string> = {};
+        ministersData.forEach(m => {
+            if (m.position === "นายกรัฐมนตรี") {
+                pmMap[m.cabinet] = m.full_name;
+            }
+        });
+        return pmMap;
+    }, [ministersData]);
+
     return {
         ministersData,
         isLoading,
@@ -192,6 +202,7 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
         cabinets,
         timelineCabinets,
         ministerHistory,
+        cabinetPMs,
         getFilteredMinisters
     };
 };

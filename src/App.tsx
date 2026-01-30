@@ -61,7 +61,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
         cabinets,
         timelineCabinets,
         ministerHistory,
-        getFilteredMinisters
+        getFilteredMinisters,
+        cabinetPMs
     } = useMinisterData(baseUrl, activeTab);
 
     // --- Derived State ---
@@ -238,6 +239,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                         isLoading={isMinisterLoading}
                         timelineCabinets={timelineCabinets}
                         ministerHistory={ministerHistory}
+                        cabinetPMs={cabinetPMs}
                     />
                 ) : isSSOLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-sm border border-slate-200">
@@ -300,17 +302,15 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                     <div className="max-w-3xl mx-auto space-y-4">
                         <p className="text-slate-500 text-sm">
                             <span className="font-semibold text-slate-700 block mb-1">Disclaimer:</span>
-                            แหล่งที่มาของข้อมูล: {activeTab === 'minister' ? (
-                                <a
-                                    href="https://soc.go.th/cabinet-history"
-                                    target="_blank" rel="noreferrer"
-                                    className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">ทำเนียบคณะรัฐมนตรี สำนักเลขาธิการคณะรัฐมนตรี</a>
-                            ) : (
-                                <a
-                                    href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
-                                    target="_blank" rel="noreferrer"
-                                    className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม</a>
-                            )} <br />
+                            {activeTab === 'sso' && (
+                                <>
+                                    แหล่งที่มาของข้อมูล: <a
+                                        href="https://www.sso.go.th/wpr/main/privilege/%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99_sub_category_list-label_1_130_716"
+                                        target="_blank" rel="noreferrer"
+                                        className="font-bold text-blue-600 hover:underline inline-flex items-center gap-1">รายงานประจำปีของสำนักงานประกันสังคม</a>
+                                    <br />
+                                </>
+                            )}
                             ข้อมูลที่แสดงผลใน Dashboard นี้รวบรวมเพื่อวัตถุประสงค์ในการศึกษาและวิเคราะห์ข้อมูลสาธารณะเท่านั้น ไม่ได้มีส่วนเกี่ยวข้องกับหน่วยงานราชการโดยตรง
                         </p>
 
@@ -318,7 +318,7 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             <span className="font-semibold text-slate-700 block mb-1">ข้อควรระวังและข้อจำกัดของข้อมูล</span>
                             การประมวลผล: ข้อมูลบางส่วนได้มาจากการประมวลผลด้วยระบบรู้จำตัวอักษร (OCR) หรือข้อมูลสาธารณะ อาจมีข้อผิดพลาดด้านการสะกดหรือรูปแบบข้อความ <br />
                             {activeTab === 'minister' ? (
-                                <>ข้อมูลคณะรัฐมนตรี: ปัจจุบันระบบแสดงข้อมูลชุดที่ 63 เป็นต้นไป ตามที่ปรากฏในฐานข้อมูลเปิด</>
+                                <></>
                             ) : (
                                 <>ข้อมูลคณะอนุกรรมการ: ปัจจุบันระบบแสดงข้อมูลได้เฉพาะบางวาระที่ทางผู้จัดทำสามารถเข้าถึงได้เท่านั้น ยังไม่ใช่ข้อมูลย้อนหลังทั้งหมด</>
                             )}
