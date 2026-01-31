@@ -105,7 +105,11 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                         <div className="w-[450px] flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อรัฐมนตรี</div>
                         <div className="flex-1 flex gap-1">
                             {timelineCabinets.map(cabinet => (
-                                <div key={cabinet} className="flex-1 min-w-[30px] text-center text-xs text-slate-500 font-medium">
+                                <div
+                                    key={cabinet}
+                                    className="flex-1 min-w-[30px] text-center text-xs text-slate-500 font-medium cursor-help"
+                                    title={`คณะรัฐมนตรี ชุดที่ ${cabinet} : นายกรัฐมนตรี ${cabinetPMs[cabinet] || '-'}`}
+                                >
                                     {cabinet}
                                 </div>
                             ))}
@@ -171,7 +175,11 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                             const isActive = history.includes(cabinet);
 
                                             return (
-                                                <div key={cabinet} className={`flex-1 min-w-[30px] flex justify-center relative group/cell ${isActive ? 'cursor-default' : ''}`}>
+                                                <div
+                                                    key={cabinet}
+                                                    className={`flex-1 min-w-[30px] flex justify-center relative group/cell ${isActive ? 'cursor-default' : 'cursor-help'}`}
+                                                    title={`คณะรัฐมนตรี ชุดที่ ${cabinet} : นายกรัฐมนตรี ${cabinetPMs[cabinet] || '-'}`}
+                                                >
                                                     {isActive ? (
                                                         <>
                                                             <span className="text-2xl leading-none select-none filter transition-all hover:scale-125">
