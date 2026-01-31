@@ -1,33 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { type MinisterRecord } from '../../components/MinisterTable';
 
-const THAI_MONTHS = [
-    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-];
-
 export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minister') => {
     const [ministersData, setMinistersData] = useState<MinisterRecord[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    const parseThaiDate = (dateStr: string): string | null => {
-        if (!dateStr || !dateStr.trim()) return null;
-        const parts = dateStr.trim().split(' ');
-        if (parts.length < 3) return null;
-
-        const day = parts[0];
-        const monthStr = parts[1];
-        const yearBE = parseInt(parts[2]);
-
-        const monthIndex = THAI_MONTHS.indexOf(monthStr);
-        if (monthIndex === -1 || isNaN(yearBE)) return null;
-
-        const yearAD = yearBE - 543;
-        const monthAD = (monthIndex + 1).toString().padStart(2, '0');
-        const dayAD = day.padStart(2, '0');
-
-        return `${yearAD}-${monthAD}-${dayAD}`;
-    };
 
     const parseMinisterCSV = (csvText: string): MinisterRecord[] => {
         const lines = csvText.trim().split('\n');
@@ -37,36 +13,23 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
             const line = lines[i].trim();
             if (!line) continue;
             const cols = line.split(',').map(c => c.trim());
-            if (cols.length < 6) continue;
+
+            // New structure: 
+            // 0: Cabinet, 1: PM, 2: Position, 3: Name, 4: Ministry, 5: Party, 6: Start, 7: End
+            if (cols.length < 7) continue;
 
             const cabinet = cols[0];
-            const fullName = cols[2];
-            const rawRole = cols[3];
-            const startDate = parseThaiDate(cols[4]) || '';
-            const endDate = cols[5] ? parseThaiDate(cols[5]) : null;
-            const party = cols[6] || 'ไม่สังกัดพรรค';
-
-            let position = "รัฐมนตรีว่าการ";
-            let ministry = rawRole;
-
-            if (rawRole === "นายกรัฐมนตรี") {
-                position = "นายกรัฐมนตรี";
-                ministry = "สำนักนายกรัฐมนตรี";
-            } else if (rawRole === "รองนายกรัฐมนตรี") {
-                position = "รองนายกรัฐมนตรี";
-                ministry = "สำนักนายกรัฐมนตรี";
-            } else if (rawRole === "สำนักนายกรัฐมนตรี") {
-                position = "รัฐมนตรีประจำ";
-                ministry = "สำนักนายกรัฐมนตรี";
-            } else if (rawRole.startsWith("กระทรวง")) {
-                position = "รัฐมนตรีว่าการ";
-                ministry = rawRole;
-            } else {
-                ministry = rawRole;
-            }
+            const pmName = cols[1];
+            const position = cols[2];
+            const fullName = cols[3];
+            const ministry = cols[4];
+            const party = cols[5] || 'ไม่สังกัดพรรค';
+            const startDate = cols[6];
+            const endDate = cols[7] ? cols[7] : null;
 
             records.push({
                 cabinet,
+                pm: pmName,
                 full_name: fullName,
                 position,
                 ministry,
@@ -218,8 +181,8 @@ export const useMinisterData = (baseUrl: string = '/', activeTab: 'sso' | 'minis
     const cabinetPMs = useMemo(() => {
         const pmMap: Record<string, string> = {};
         ministersData.forEach(m => {
-            if (m.position === "นายกรัฐมนตรี") {
-                pmMap[m.cabinet] = m.full_name;
+            if (m.pm) {
+                pmMap[m.cabinet] = m.pm;
             }
         });
         return pmMap;

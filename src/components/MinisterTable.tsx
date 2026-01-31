@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 export interface MinisterRecord {
     cabinet: string;
+    pm: string;
     full_name: string;
     position: string;
     ministry: string;
