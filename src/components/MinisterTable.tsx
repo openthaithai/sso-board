@@ -130,7 +130,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, cabinetPMs }: M
                                         <div className="min-w-0 flex-1">
                                             <div className="text-xl font-bold text-slate-800 mb-1">{person.full_name}</div>
                                             <div className="text-sm text-slate-400 mb-4 font-normal">
-                                                พบ {person.roles.length} ตำแหน่ง อยู่ใน {person.uniqueCabinets.size} ชุดคณะรัฐมนตรี
+                                                พบ {person.roles.length} ตำแหน่ง อยู่ใน {person.uniqueCabinets.size} ชุดคณะรัฐมนตรี จากข้อมูลทั้งหมด {timelineCabinets.length} ชุด (คิดเป็น {Math.round((person.uniqueCabinets.size / timelineCabinets.length) * 100)}%)
                                             </div>
 
                                             <div className="space-y-4 pl-3 border-l-2 border-slate-100 ml-1">
@@ -208,7 +208,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, cabinetPMs }: M
                             </div>
                             <div>
                                 <div className="font-bold text-lg text-slate-700">{person.full_name}</div>
-                                <div className="text-xs text-slate-400">พบ {person.roles.length} ตำแหน่ง อยู่ใน {person.uniqueCabinets.size} ชุดคณะรัฐมนตรี</div>
+                                <div className="text-xs text-slate-400">พบ {person.roles.length} ตำแหน่ง อยู่ใน {person.uniqueCabinets.size} ชุดคณะรัฐมนตรี จากข้อมูลทั้งหมด {timelineCabinets.length} ชุด (คิดเป็น {Math.round((person.uniqueCabinets.size / timelineCabinets.length) * 100)}%)</div>
                             </div>
                         </div>
 
