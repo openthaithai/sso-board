@@ -39,7 +39,7 @@ const MinisterAvatar = ({ name, size = 32 }: { name: string, size?: number }) =>
     );
 };
 
-const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory, cabinetPMs }: MinisterTableProps) => {
+const MinisterTable = ({ ministers, isLoading, timelineCabinets, cabinetPMs }: MinisterTableProps) => {
 
     const groupedMinisters = useMemo(() => {
         const groups = new Map<string, {
@@ -119,8 +119,6 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                     {/* Rows */}
                     <div className="space-y-4">
                         {groupedMinisters.map((person) => {
-                            const history = ministerHistory[person.full_name] || [];
-
                             return (
                                 <div key={person.full_name} className="flex items-start hover:bg-slate-50/50 transition-colors py-6 border-b border-slate-50 last:border-0 group rounded-lg">
 
@@ -172,7 +170,7 @@ const MinisterTable = ({ ministers, isLoading, timelineCabinets, ministerHistory
                                     {/* Timeline Grid */}
                                     <div className="flex-1 flex gap-1 h-full pt-4">
                                         {timelineCabinets.map(cabinet => {
-                                            const isActive = history.includes(cabinet);
+                                            const isActive = person.uniqueCabinets.has(cabinet);
 
                                             return (
                                                 <div
