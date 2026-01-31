@@ -7,17 +7,18 @@ export interface MemberStats {
     maxConsecutive: number;
     years: number[];
     history: { [year: number]: string };
-    typeHistory: { [year: number]: string };
-    types: string[];
-    committeeHistory: { [year: number]: string[] };
-    committees: string[];
-    uniqueRoles: string[];
+    typeHistory?: { [year: number]: string };
+    types?: string[];
+    committeeHistory?: { [year: number]: string[] };
+    committees?: string[];
+    uniqueRoles?: string[];
 }
 
 interface BubbleChartProps {
     members: MemberStats[];
     onMemberClick: (member: MemberStats) => void;
     baseUrl: string;
+    imageSubDir?: string; // Optional prop for image subdirectory
 }
 
 interface BubbleNode extends d3.SimulationNodeDatum {
@@ -30,7 +31,7 @@ interface BubbleNode extends d3.SimulationNodeDatum {
     fy?: number | null;
 }
 
-const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseUrl }) => {
+const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseUrl, imageSubDir = 'images' }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -184,8 +185,9 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('r', d => d.r);
 
         // 2. Image
+        const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
         node.append('image')
-            .attr('xlink:href', (d) => `${baseUrl}/images/${d.data.name}.jpg`)
+            .attr('xlink:href', (d) => `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.jpg`) // Use dynamic imageSubDir
             .attr('x', d => -d.r)
             .attr('y', d => -d.r)
             .attr('width', d => d.r * 2)
@@ -193,7 +195,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('clip-path', (d, i) => `url(#clip-${i}-${d.id.replace(/[^\w-]/g, '')})`)
             .attr('preserveAspectRatio', 'xMidYMid slice')
             .on('error', function () { // Removed 'd'
-                d3.select(this).attr('xlink:href', `${baseUrl}/images/placeholder.jpg`);
+                d3.select(this).attr('xlink:href', `${cleanBaseUrl}/images/placeholder.jpg`);
             });
 
 
@@ -242,7 +244,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             simulation.stop();
         };
 
-    }, [members, dimensions, baseUrl]);
+    }, [members, dimensions, baseUrl, imageSubDir]);
 
     return (
         <div ref={containerRef} className="w-full h-full relative overflow-hidden rounded-lg">
