@@ -90,10 +90,10 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         // --- Simulation Setup ---
         const simulation = d3.forceSimulation<BubbleNode>(nodes)
             .force('charge', d3.forceManyBody().strength(10)) // Weak attraction/repulsion
-            .force('collide', d3.forceCollide<BubbleNode>().radius(d => d.r + 0.5).iterations(3)) // Tight gap
-            .force('center', d3.forceCenter(centerX, centerY).strength(1)) // Pull to center
-            .force('x', d3.forceX(centerX).strength(0.05))
-            .force('y', d3.forceY(centerY).strength(0.05))
+            .force('collide', d3.forceCollide<BubbleNode>().radius(d => d.r + 2).strength(0.8).iterations(5)) // Stronger collision, more space
+            .force('center', d3.forceCenter(centerX, centerY).strength(0.8)) // Reduced slightly from 1
+            .force('x', d3.forceX(centerX).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
+            .force('y', d3.forceY(centerY).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
             .stop(); // Stop immediately to pre-calculate
 
         // --- Pre-tick for Initial Layout ---
