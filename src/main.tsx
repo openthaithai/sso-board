@@ -3,11 +3,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 
-console.log("Main.tsx starting...");
-
-import { initializeApp } from "firebase/app"
-import { getAnalytics } from "firebase/analytics"
-
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -18,31 +13,47 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
 
-console.log("Firebase config loaded:", !!firebaseConfig.apiKey);
-
-try {
-  const app = initializeApp(firebaseConfig)
-  getAnalytics(app)
-  console.log("Firebase initialized");
-} catch (e) {
-  console.error("Firebase init failed:", e);
-}
-
 const rootElement = document.getElementById('root');
-console.log("Root element found:", !!rootElement);
 
 if (rootElement) {
   try {
-    console.log("Starting React render...");
     createRoot(rootElement).render(
       <StrictMode>
         <App baseUrl="/ssoboard" />
       </StrictMode>,
     )
-    console.log("React render called");
   } catch (e) {
-    console.error("React render failed:", e);
+    if (import.meta.env.DEV) {
+      console.error("React render failed:", e);
+    }
   }
 } else {
-  console.error("CRITICAL: Root element not found in DOM");
+  if (import.meta.env.DEV) {
+    console.error("CRITICAL: Root element not found in DOM");
+  }
+}
+
+const scheduleIdle = (cb: () => void) => {
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(cb);
+  } else {
+    setTimeout(cb, 1000);
+  }
+};
+
+if (import.meta.env.PROD && firebaseConfig.apiKey && firebaseConfig.measurementId) {
+  scheduleIdle(async () => {
+    try {
+      const [{ initializeApp }, { getAnalytics }] = await Promise.all([
+        import('firebase/app'),
+        import('firebase/analytics')
+      ]);
+      const app = initializeApp(firebaseConfig);
+      getAnalytics(app);
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.error("Firebase init failed:", e);
+      }
+    }
+  });
 }

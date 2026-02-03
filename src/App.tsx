@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { LayoutGrid, List, AlertCircle } from 'lucide-react';
-import BubbleChart from './components/BubbleChart';
+const BubbleChart = lazy(() => import('./components/BubbleChart'));
 import MinisterTable from './components/MinisterTable';
 import DashboardFilters from './components/DashboardFilters';
 import MemberTable from './components/MemberTable';
@@ -16,8 +16,6 @@ interface AppProps {
 }
 
 const App = ({ baseUrl = '/' }: AppProps) => {
-    console.log("App component executing, baseUrl:", baseUrl);
-
     // --- State ---
     const [selectedCommittee, setSelectedCommittee] = useState<string>('All');
     const [selectedYear, setSelectedYear] = useState<number | 'All'>('All');
@@ -260,15 +258,17 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                                 </button>
                             </div>
 
-                            <BubbleChart
-                                members={ministerStats}
-                                baseUrl={baseUrl}
-                                imageSubDir="images/ministers"
-                                onMemberClick={(member) => {
-                                    // Construct a mock MemberStats for the modal if needed, or update Modal to handle minister data
-                                    setSelectedMember(member as MemberStats);
-                                }}
-                            />
+                            <Suspense fallback={<div className="flex-1 flex items-center justify-center text-white/70">Loading bubble view...</div>}>
+                                <BubbleChart
+                                    members={ministerStats}
+                                    baseUrl={baseUrl}
+                                    imageSubDir="images/ministers"
+                                    onMemberClick={(member) => {
+                                        // Construct a mock MemberStats for the modal if needed, or update Modal to handle minister data
+                                        setSelectedMember(member as MemberStats);
+                                    }}
+                                />
+                            </Suspense>
                         </div>
                     )
                 ) : isSSOLoading ? (
@@ -309,12 +309,14 @@ const App = ({ baseUrl = '/' }: AppProps) => {
                             </button>
                         </div>
 
-                        <BubbleChart
-                            members={statsData.members}
-                            baseUrl={baseUrl}
-                            imageSubDir="images"
-                            onMemberClick={(member) => setSelectedMember(member as MemberStats)}
-                        />
+                        <Suspense fallback={<div className="flex-1 flex items-center justify-center text-white/70">Loading bubble view...</div>}>
+                            <BubbleChart
+                                members={statsData.members}
+                                baseUrl={baseUrl}
+                                imageSubDir="images"
+                                onMemberClick={(member) => setSelectedMember(member as MemberStats)}
+                            />
+                        </Suspense>
                     </div>
                 )}
 
