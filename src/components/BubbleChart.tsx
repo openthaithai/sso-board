@@ -1,5 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import { max } from 'd3-array';
+import { drag } from 'd3-drag';
+import {
+    forceCenter,
+    forceCollide,
+    forceManyBody,
+    forceSimulation,
+    forceX,
+    forceY,
+    type SimulationNodeDatum
+} from 'd3-force';
+import { scaleLinear } from 'd3-scale';
+import { select } from 'd3-selection';
+import { zoom, zoomIdentity } from 'd3-zoom';
 
 export interface MemberStats {
     name: string;
@@ -21,7 +34,7 @@ interface BubbleChartProps {
     imageSubDir?: string; // Optional prop for image subdirectory
 }
 
-interface BubbleNode extends d3.SimulationNodeDatum {
+interface BubbleNode extends SimulationNodeDatum {
     id: string;
     r: number;
     data: MemberStats;
@@ -55,7 +68,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
     useEffect(() => {
         if (!svgRef.current || dimensions.width === 0 || dimensions.height === 0 || members.length === 0) return;
 
-        const svg = d3.select(svgRef.current);
+        const svg = select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous render
 
         const width = dimensions.width;
@@ -66,11 +79,11 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         // --- Scale Logic ---
         const minRadius = 30; // Increased base size slightly for visibility
         const maxRadius = 160; // Significantly larger max for contrast
-        const maxYears = d3.max(members, d => d.totalYears) || 1;
+        const maxYears = max(members, d => d.totalYears) || 1;
 
         // Linear radius scale = Quadratic area scale (Exaggerated visual difference)
         // Matches user request: Radius = years * factor
-        const radiusScale = d3.scaleLinear()
+        const radiusScale = scaleLinear()
             .domain([0, maxYears])
             .range([minRadius, maxRadius]);
 
@@ -88,17 +101,17 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         const g = svg.append('g');
 
         // --- Simulation Setup ---
-        const simulation = d3.forceSimulation<BubbleNode>(nodes)
-            .force('charge', d3.forceManyBody().strength(10)) // Weak attraction/repulsion
-            .force('collide', d3.forceCollide<BubbleNode>().radius(d => d.r + 2).strength(0.8).iterations(5)) // Stronger collision, more space
-            .force('center', d3.forceCenter(centerX, centerY).strength(0.8)) // Reduced slightly from 1
-            .force('x', d3.forceX(centerX).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
-            .force('y', d3.forceY(centerY).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
+        const simulation = forceSimulation<BubbleNode>(nodes)
+            .force('charge', forceManyBody().strength(10)) // Weak attraction/repulsion
+            .force('collide', forceCollide<BubbleNode>().radius(d => d.r + 2).strength(0.8).iterations(5)) // Stronger collision, more space
+            .force('center', forceCenter(centerX, centerY).strength(0.8)) // Reduced slightly from 1
+            .force('x', forceX(centerX).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
+            .force('y', forceY(centerY).strength((d) => 0.05 + 0.6 * Math.pow((d as BubbleNode).r / maxRadius, 2)))
             .stop(); // Stop immediately to pre-calculate
 
         // --- Pre-tick for Initial Layout ---
         // Run simulation for enough ticks to settle structure
-        for (let i = 0; i < 300; ++i) simulation.tick();
+        for (let i = 0; i < 200; ++i) simulation.tick();
 
         // --- Auto-Zoom to Fit ---
         const padding = 40;
@@ -124,20 +137,20 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         // Apply initial transform
         // We want to center the [midX, midY] at [width/2, height/2] with scale 'scale'
         // transform: translate(width/2 - midX*scale, height/2 - midY*scale) scale(scale)
-        const initialTransform = d3.zoomIdentity
+        const initialTransform = zoomIdentity
             .translate(width / 2 - midX * scale, height / 2 - midY * scale)
             .scale(scale);
 
 
         // --- Zoom Behavior ---
-        const zoom = d3.zoom<SVGSVGElement, unknown>()
+        const zoomBehavior = zoom<SVGSVGElement, unknown>()
             .scaleExtent([0.1, 4])
             .on('zoom', (event) => {
                 g.attr('transform', event.transform);
             });
 
-        svg.call(zoom)
-            .call(zoom.transform, initialTransform);
+        svg.call(zoomBehavior)
+            .call(zoomBehavior.transform, initialTransform);
 
         // --- Restart Simulation for "Life" ---
         // We want constant subtle movement.
@@ -150,7 +163,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
 
 
         // --- Drag Behavior ---
-        const drag = d3.drag<SVGGElement, BubbleNode>()
+        const dragBehavior = drag<SVGGElement, BubbleNode>()
             .on('start', (event, d) => {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
                 d.fx = d.x;
@@ -172,7 +185,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .enter()
             .append('g')
             .attr('class', 'node cursor-grab active:cursor-grabbing')
-            .call(drag)
+            .call(dragBehavior)
             .on('click', (event, d) => {
                 event.stopPropagation();
                 onMemberClick(d.data);
@@ -187,7 +200,15 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         // 2. Image
         const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
         node.append('image')
-            .attr('xlink:href', (d) => `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.jpg`) // Use dynamic imageSubDir
+            .attr('xlink:href', (d) => `${cleanBaseUrl}/${imageSubDir}/thumbs/${d.data.name}.webp`) // Prefer lightweight thumbs
+            .attr('data-fallbacks', (d) => JSON.stringify([
+                `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.jpg`,
+                `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.jpeg`,
+                `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.png`,
+                `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.webp`,
+                `${cleanBaseUrl}/${imageSubDir}/${d.data.name}.svg`
+            ]))
+            .attr('data-fallback-index', '0')
             .attr('x', d => -d.r)
             .attr('y', d => -d.r)
             .attr('width', d => d.r * 2)
@@ -195,7 +216,19 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('clip-path', (d, i) => `url(#clip-${i}-${d.id.replace(/[^\w-]/g, '')})`)
             .attr('preserveAspectRatio', 'xMidYMid slice')
             .on('error', function () { // Removed 'd'
-                d3.select(this).attr('xlink:href', `${cleanBaseUrl}/images/placeholder.jpg`);
+                const self = select(this);
+                const fallbackRaw = self.attr('data-fallbacks');
+                const indexRaw = self.attr('data-fallback-index') || '0';
+                const index = Number(indexRaw);
+                if (fallbackRaw) {
+                    const fallbacks = JSON.parse(fallbackRaw) as string[];
+                    if (index < fallbacks.length) {
+                        self.attr('xlink:href', fallbacks[index]);
+                        self.attr('data-fallback-index', String(index + 1));
+                        return;
+                    }
+                }
+                self.attr('xlink:href', `${cleanBaseUrl}/images/placeholder.jpg`);
             });
 
 
@@ -226,7 +259,7 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             .attr('font-family', 'Prompt, sans-serif')
             .style('pointer-events', 'none')
             .each(function () { // Removed 'd'
-                const self = d3.select(this);
+                const self = select(this);
                 let text = self.text();
                 // Check if truncation is needed logic could go here more precisely with getComputedTextLength
                 // For now, heuristic limit
@@ -240,7 +273,17 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
             node.attr('transform', d => `translate(${d.x},${d.y})`);
         });
 
+        const handleVisibility = () => {
+            if (document.hidden) {
+                simulation.alphaTarget(0);
+            } else {
+                simulation.alphaTarget(0.05).restart();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
+
         return () => {
+            document.removeEventListener('visibilitychange', handleVisibility);
             simulation.stop();
         };
 
