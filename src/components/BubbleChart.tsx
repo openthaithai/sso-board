@@ -10,7 +10,7 @@ import {
     forceY,
     type SimulationNodeDatum
 } from 'd3-force';
-import { scaleLinear } from 'd3-scale';
+import { scaleLog } from 'd3-scale';
 import { select } from 'd3-selection';
 import { zoom, zoomIdentity } from 'd3-zoom';
 
@@ -81,17 +81,16 @@ const BubbleChart: React.FC<BubbleChartProps> = ({ members, onMemberClick, baseU
         const maxRadius = 160; // Significantly larger max for contrast
         const maxYears = max(members, d => d.totalYears) || 1;
 
-        // Linear radius scale = Quadratic area scale (Exaggerated visual difference)
-        // Matches user request: Radius = years * factor
-        const radiusScale = scaleLinear()
-            .domain([0, maxYears])
+        // Logarithmic scale for better distribution
+        const radiusScale = scaleLog()
+            .domain([1, maxYears])
             .range([minRadius, maxRadius]);
 
         // --- Data Preparation ---
         // Initialize position at center
         const nodes: BubbleNode[] = members.map(m => ({
             id: m.name,
-            r: radiusScale(m.totalYears),
+            r: radiusScale(Math.max(1, m.totalYears)),
             data: m,
             x: centerX + (Math.random() - 0.5) * 50,
             y: centerY + (Math.random() - 0.5) * 50
