@@ -124,7 +124,7 @@ export const useSSOData = (baseUrl: string = '/') => {
         return ['All', ...(hasPriority ? [priority] : []), ...others];
     }, [rawData]);
 
-    const getStats = (selectedCommittee: string, searchQuery: string, sortBy: 'total' | 'consecutive' | 'name', selectedYear: number | 'All') => {
+    const getStats = (selectedCommittee: string, searchQuery: string, sortBy: 'total' | 'consecutive', selectedYear: number | 'All') => {
         const filtered = rawData.filter(d => {
             const matchesCommittee = selectedCommittee === 'All' || d.committee === selectedCommittee;
             const matchesSearch = searchQuery === '' || d.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -210,16 +210,10 @@ export const useSSOData = (baseUrl: string = '/') => {
 
         members.sort((a, b) => {
             if (sortBy === 'total') return b.totalYears - a.totalYears;
-            if (sortBy === 'consecutive') return b.maxConsecutive - a.maxConsecutive;
-            return a.name.localeCompare(b.name, 'th');
+            return b.maxConsecutive - a.maxConsecutive;
         });
 
-        const yearRange: number[] = [];
-        if (minYear !== 3000) {
-            for (let y = minYear; y <= maxYear; y++) {
-                yearRange.push(y);
-            }
-        }
+        const yearRange = Array.from(new Set(filtered.map(d => d.year))).sort((a, b) => a - b);
 
         return { members, minYear, maxYear, yearRange };
     };

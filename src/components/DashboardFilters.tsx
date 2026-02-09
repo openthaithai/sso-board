@@ -13,8 +13,8 @@ interface SSOFilterProps {
     committees: string[];
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    sortBy: 'total' | 'consecutive' | 'name';
-    setSortBy: (sort: 'total' | 'consecutive' | 'name') => void;
+    sortBy: 'total' | 'consecutive';
+    setSortBy: (sort: 'total' | 'consecutive') => void;
     filterStats: {
         count: number;
         minYear: number;
@@ -208,12 +208,6 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ activeTab, ssoProps
                         className={`flex-1 py-1 text-xs md:text-sm rounded-md transition-all ${sortBy === 'consecutive' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}
                     >
                         ต่อเนื่องสุด
-                    </button>
-                    <button
-                        onClick={() => setSortBy('name')}
-                        className={`flex-1 py-1 text-xs md:text-sm rounded-md transition-all ${sortBy === 'name' ? 'bg-white shadow text-blue-600 font-medium' : 'text-slate-500'}`}
-                    >
-                        ตามชื่อ
                     </button>
                 </div>
             </div>
