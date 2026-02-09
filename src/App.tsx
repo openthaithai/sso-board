@@ -19,8 +19,8 @@ const App = ({ baseUrl = '/' }: AppProps) => {
     // --- State ---
     const [selectedCommittee, setSelectedCommittee] = useState<string>('All');
     const [selectedYear, setSelectedYear] = useState<number | 'All'>('All');
+    const [sortBy, setSortBy] = useState<'total' | 'consecutive'>('total');
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [sortBy, setSortBy] = useState<'total' | 'consecutive' | 'name'>('total');
 
     const [viewMode, setViewMode] = useState<'table' | 'bubble'>('table');
     const [selectedMember, setSelectedMember] = useState<MemberStats | null>(null);
