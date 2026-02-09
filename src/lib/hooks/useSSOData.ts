@@ -214,12 +214,7 @@ export const useSSOData = (baseUrl: string = '/') => {
             return a.name.localeCompare(b.name, 'th');
         });
 
-        const yearRange: number[] = [];
-        if (minYear !== 3000) {
-            for (let y = minYear; y <= maxYear; y++) {
-                yearRange.push(y);
-            }
-        }
+        const yearRange = Array.from(new Set(filtered.map(d => d.year))).sort((a, b) => a - b);
 
         return { members, minYear, maxYear, yearRange };
     };

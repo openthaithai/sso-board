@@ -34,8 +34,7 @@ const MemberTable: React.FC<MemberTableProps> = ({
                     {/* Header Row */}
                     <div className="flex mb-2">
                         <div className="w-64 flex-shrink-0 font-semibold text-slate-600 text-sm">รายชื่อกรรมการ</div>
-                        <div className="w-48 flex-shrink-0 text-center text-xs font-semibold text-slate-500">ระยะเวลา (ปี)</div>
-                        <div className="w-24 flex-shrink-0 text-center text-xs font-semibold text-slate-500 border-r border-slate-200 mr-2">ต่อเนื่อง (ปี)</div>
+                        <div className="w-72 flex-shrink-0 text-center text-xs font-semibold text-slate-500 border-r border-slate-200 mr-2">ระยะเวลา (ปี)</div>
                         <div className="flex-1 flex gap-1">
                             {yearRange.map(year => (
                                 <div key={year}
@@ -73,15 +72,17 @@ const MemberTable: React.FC<MemberTableProps> = ({
                                     </div>
                                 </div>
 
-                                <div className="w-48 flex-shrink-0 text-center">
-                                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                                        {member.totalYears} ปี จากข้อมูลทั้งหมด {allYears.length} ปี
-                                    </span>
-                                </div>
-                                <div className="w-24 flex-shrink-0 text-center border-r border-slate-200 mr-2">
-                                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${member.maxConsecutive > 3 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                                        {member.maxConsecutive}
-                                    </span>
+                                <div className="w-72 flex-shrink-0 text-center border-r border-slate-200 mr-2">
+                                    <div className={`inline-flex flex-col px-3 py-1 rounded-lg text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-600'}`}>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <span>ทั้งหมด:</span>
+                                            <span className="font-bold">{member.totalYears} ปี <span className="text-[10px] text-slate-400 font-normal">จาก {allYears.length} ปี</span></span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-4 border-t border-slate-200/50 mt-1 pt-1">
+                                            <span>ต่อเนื่อง:</span>
+                                            <span className={`font-bold ${member.maxConsecutive > 3 ? 'text-emerald-600' : ''}`}>{member.maxConsecutive} ปี</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Timeline Grid */}
