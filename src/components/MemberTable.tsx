@@ -6,13 +6,12 @@ interface MemberTableProps {
     members: MemberStats[];
     yearRange: number[];
     selectedYear: number | 'All';
-    allYears: number[];
     dataMode: 'sample' | 'full' | 'simulated';
     baseUrl: string;
 }
 
 const MemberTable: React.FC<MemberTableProps> = ({
-    members, yearRange, selectedYear, allYears, dataMode, baseUrl
+    members, yearRange, selectedYear, dataMode, baseUrl
 }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -73,14 +72,14 @@ const MemberTable: React.FC<MemberTableProps> = ({
                                 </div>
 
                                 <div className="w-72 flex-shrink-0 text-center border-r border-slate-200 mr-2">
-                                    <div className={`inline-flex flex-col px-3 py-1 rounded-lg text-xs font-medium ${member.totalYears > 5 ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-600'}`}>
+                                    <div className="inline-flex flex-col px-3 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-100">
                                         <div className="flex items-center justify-between gap-4">
                                             <span>ทั้งหมด:</span>
-                                            <span className="font-bold">{member.totalYears} ปี <span className="text-[10px] text-slate-400 font-normal">จาก {allYears.length} ปี</span></span>
+                                            <span className="font-bold">{member.totalYears} ปี</span>
                                         </div>
-                                        <div className="flex items-center justify-between gap-4 border-t border-slate-200/50 mt-1 pt-1">
+                                        <div className="flex items-center justify-between gap-4 border-t border-red-200/50 mt-1 pt-1">
                                             <span>ต่อเนื่อง:</span>
-                                            <span className={`font-bold ${member.maxConsecutive > 3 ? 'text-emerald-600' : ''}`}>{member.maxConsecutive} ปี</span>
+                                            <span className={`font-bold ${member.maxConsecutive > 3 ? 'text-red-600' : ''}`}>{member.maxConsecutive} ปี</span>
                                         </div>
                                     </div>
                                 </div>
