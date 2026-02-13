@@ -65,13 +65,6 @@ const App = ({ baseUrl = '/' }: AppProps) => {
 
     // --- Derived State ---
     // 1. SSO Stats
-    useEffect(() => {
-        if (allYears.length > 0 && selectedYear === 'All' && activeTab === 'sso') {
-            // Only set default year on first load if needed, but 'All' is default in state
-            setSelectedYear(allYears[0]);
-        }
-    }, [allYears, activeTab]);
-
     const statsData = getStats(selectedCommittee, searchQuery, sortBy, selectedYear);
 
     // 2. Minister Stats
